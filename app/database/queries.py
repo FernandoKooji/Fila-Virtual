@@ -18,6 +18,19 @@ WHERE id = 1;
 
 #---procurar proxima senha e mudanca de estado para aguardando---
 
+GET_CURRENT_TICKET = """
+SELECT
+    id,
+    ticket_code,
+    ticket_type,
+    status,
+    called_at
+FROM tickets
+WHERE status = 'em_atendimento'
+ORDER BY called_at DESC
+LIMIT 1;
+"""
+
 GET_NEXT_PRIORITY = """
 SELECT *
 FROM tickets
@@ -52,7 +65,7 @@ SET last_priority_number = ?
 WHERE id = 1;
 """
 
-#mudanca de estado para atendimento
+#estado: em atendimento
 
 CALL_TICKET = """
 UPDATE tickets
@@ -60,6 +73,20 @@ SET
     status = 'em_atendimento',
     called_at = CURRENT_TIMESTAMP
 WHERE id = ?;
+"""
+
+#estado: atendimento finalizado
+FINISH_TICKET = """
+UPDATE tickets
+SET
+    status = 'finalizado',
+    finished_at = CURRENT_TIMESTAMP,
+    service_time_seconds =
+        CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)
+        -
+        CAST(strftime('%s', called_at) AS INTEGER)
+WHERE id = ?;
+AND status='em_atendimento';
 """
 
 #---consulta de INSERT---

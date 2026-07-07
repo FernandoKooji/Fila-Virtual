@@ -18,7 +18,7 @@ app = FastAPI(
 
 initialize_database()
 
-#===REGISTRA OS ROUTERS / ROTAS
+#===REGISTRA OS ROUTERS / ROTAS===
 
 app.include_router(ticket_router)
 app.include_router(queue_router)
