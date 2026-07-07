@@ -85,7 +85,7 @@ SET
         CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)
         -
         CAST(strftime('%s', called_at) AS INTEGER)
-WHERE id = ?;
+WHERE id = ?
 AND status='em_atendimento';
 """
 

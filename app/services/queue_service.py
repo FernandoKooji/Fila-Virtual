@@ -4,6 +4,7 @@ from app.database.database import get_connection
 
 #---consulta senhas---
 from app.database.queries import (
+    FINISH_TICKET,
     GET_CURRENT_TICKET,
     GET_NEXT_PRIORITY,
     GET_NEXT_NORMAL,
@@ -99,10 +100,10 @@ def finish_ticket(ticket_id):
 
         connection.close()
 
-    return {
-        "success": False,
-        "message": "Senha não encontrada ou não está em atendimento."
-    }
+        return {
+            "success": False,
+            "message": "Senha não encontrada ou não está em atendimento."
+        }
 
     connection.commit()
     connection.close()
