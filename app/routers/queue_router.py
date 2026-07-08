@@ -1,35 +1,53 @@
-#===MODELOS===
+# ============================
+# Imports
+# ============================
 
-#---fila---
 from fastapi import APIRouter
 
-#---finaliza atendimento---
-from app.models.ticket import TicketFinish
+from app.schemas.ticket import (
+    FinishTicketRequest,
+    MessageResponse
+)
+
+from app.schemas.queue import (
+    CurrentTicketResponse
+)
+
 from app.services.queue_service import (
     call_next,
     finish_ticket,
     get_current_ticket
 )
 
-#===ROTAS===
+# ============================
+# Router
+# ============================
 
-#---fila---
 router = APIRouter(
     prefix="/queue",
     tags=["Queue"]
 )
 
-#---chama atual---
-@router.get("/current")
+# ============================
+# Routes
+# ============================
+
+@router.get(
+    "/current",
+    response_model=CurrentTicketResponse
+)
 def current_ticket_route():
     return get_current_ticket()
 
-#---chama o proximo---
+
 @router.post("/next")
 def call_next_route():
     return call_next()
 
-#---finaliza atendimento---
-@router.post("/finish")
-def finish_ticket_route(ticket: TicketFinish):
+
+@router.post(
+    "/finish",
+    response_model=MessageResponse
+)
+def finish_ticket_route(ticket: FinishTicketRequest):
     return finish_ticket(ticket.id)

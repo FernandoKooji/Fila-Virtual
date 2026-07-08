@@ -1,9 +1,7 @@
-
-#===IMPORTS===##
+from fastapi import HTTPException
 
 from app.database.database import get_connection
 
-#---consulta senhas---
 from app.database.queries import (
     GET_LAST_NORMAL,
     GET_LAST_PRIORITY,
@@ -12,58 +10,84 @@ from app.database.queries import (
     INSERT_TICKET
 )
 
+
 def create_ticket(ticket_type):
+
+    # Valida o tipo de senha antes de acessar o banco
+    if ticket_type not in ("N", "P"):
+        raise HTTPException(
+            status_code=400,
+            detail="Tipo de senha inválido."
+        )
+
     connection = get_connection()
     cursor = connection.cursor()
 
-    #verifica tipo de senha
-    if ticket_type == "N":
-        config = {
-            "get": GET_LAST_NORMAL,
-            "update": UPDATE_LAST_NORMAL,
-            "column": "last_normal_number",
-            "prefix": "N"
-        }
-    else:
-        config = {
-            "get": GET_LAST_PRIORITY,
-            "update": UPDATE_LAST_PRIORITY,
-            "column": "last_priority_number",
-            "prefix": "P"
-        }
+    try:
 
-    # Executa o SELECT
-    cursor.execute(config["get"])
+        # Configuração conforme o tipo da senha
+        if ticket_type == "N":
 
-    result = cursor.fetchone()
+            config = {
+                "get": GET_LAST_NORMAL,
+                "update": UPDATE_LAST_NORMAL,
+                "column": "last_normal_number",
+                "prefix": "N"
+            }
 
-    last_number = result[config["column"]]
+        else:
 
-    new_number = last_number + 1
+            config = {
+                "get": GET_LAST_PRIORITY,
+                "update": UPDATE_LAST_PRIORITY,
+                "column": "last_priority_number",
+                "prefix": "P"
+            }
 
-    cursor.execute(
-        config["update"],
-        (new_number,)
-    )
-    
-    ticket_code = config["prefix"] + str(new_number).zfill(3)
+        # Busca o último número utilizado
+        cursor.execute(config["get"])
 
-    cursor.execute(
-        INSERT_TICKET,
-        (
-            ticket_code,
-            ticket_type
+        result = cursor.fetchone()
+
+        last_number = result[config["column"]]
+
+        # Gera o próximo número
+        new_number = last_number + 1
+
+        # Atualiza o contador
+        cursor.execute(
+            config["update"],
+            (new_number,)
         )
-    )
 
-    connection.commit()
-    connection.close()
+        # Monta o código da senha
+        ticket_code = (
+            config["prefix"] +
+            str(new_number).zfill(3)
+        )
 
-    return {
-        "ticket_code": ticket_code,
-        "status": "aguardando"
-    }
+        # Salva o ticket
+        cursor.execute(
+            INSERT_TICKET,
+            (
+                ticket_code,
+                ticket_type
+            )
+        )
 
+        # Obtém o ID criado
+        ticket_id = cursor.lastrowid
 
+        connection.commit()
 
+        return {
+            "success": True,
+            "id": ticket_id,
+            "ticket_code": ticket_code,
+            "ticket_type": ticket_type,
+            "status": "aguardando"
+        }
 
+    finally:
+
+        connection.close()

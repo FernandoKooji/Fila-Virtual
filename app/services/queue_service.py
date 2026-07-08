@@ -1,8 +1,11 @@
-#===IMPORTS===
+# ============================
+# Imports
+# ============================
+
+from fastapi import HTTPException
 
 from app.database.database import get_connection
 
-#---consulta senhas---
 from app.database.queries import (
     FINISH_TICKET,
     GET_CURRENT_TICKET,
@@ -11,104 +14,122 @@ from app.database.queries import (
     CALL_TICKET
 )
 
-#===FUNCOES===
 
-#---funcao chama atual---
+# ============================
+# Atendimento atual
+# ============================
+
 def get_current_ticket():
 
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute(GET_CURRENT_TICKET)
-    ticket = cursor.fetchone()
+    try:
 
-    if ticket is None:
-        connection.close()
+        cursor.execute(GET_CURRENT_TICKET)
+
+        ticket = cursor.fetchone()
+
+        if ticket is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Nenhum atendimento em andamento."
+            )
 
         return {
-            "success": False,
-            "message": "Nenhum atendimento em andamento."
-        }
-
-    connection.close()
-
-    return {
-        "success": True,
-        "ticket": {
+            "success": True,
             "id": ticket["id"],
             "ticket_code": ticket["ticket_code"],
             "ticket_type": ticket["ticket_type"],
             "status": ticket["status"],
             "called_at": ticket["called_at"]
         }
-    } 
+
+    finally:
+
+        connection.close()
 
 
+# ============================
+# Chamar próxima senha
+# ============================
 
-#---funcao chama proximo---
 def call_next():
 
-    #procura preferencial
     connection = get_connection()
     cursor = connection.cursor()
-    
-    cursor.execute(GET_NEXT_PRIORITY)
-    ticket = cursor.fetchone()
 
-    if ticket is None:
+    try:
 
-        #procura normal
-        cursor.execute(GET_NEXT_NORMAL)
+        # Procura senha preferencial
+        cursor.execute(GET_NEXT_PRIORITY)
 
         ticket = cursor.fetchone()
 
-    if ticket is None:
-        connection.close()
+        # Caso não exista, procura senha normal
+        if ticket is None:
+
+            cursor.execute(GET_NEXT_NORMAL)
+
+            ticket = cursor.fetchone()
+
+        # Nenhuma senha aguardando
+        if ticket is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Fila vazia."
+            )
+
+        # Atualiza o status da senha
+        cursor.execute(
+            CALL_TICKET,
+            (ticket["id"],)
+        )
+
+        connection.commit()
 
         return {
-            "message": "Fila vazia"
+            "success": True,
+            "id": ticket["id"],
+            "ticket_code": ticket["ticket_code"],
+            "ticket_type": ticket["ticket_type"],
+            "status": "em_atendimento"
         }
 
-    #localiza id
-    cursor.execute(
-        CALL_TICKET,
-        (ticket["id"],)
-    )
+    finally:
 
-    connection.commit()
-    connection.close()
+        connection.close()
 
-    return {
-        "id": ticket["id"],
-        "ticket_code": ticket["ticket_code"],
-        "ticket_type": ticket["ticket_type"],
-        "status": "em_atendimento"
-    }
 
-#---funcao finaliza atendimento---
+# ============================
+# Finalizar atendimento
+# ============================
+
 def finish_ticket(ticket_id):
 
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute(
-        FINISH_TICKET,
-        (ticket_id,)
-    )
+    try:
 
-    if cursor.rowcount == 0:
+        cursor.execute(
+            FINISH_TICKET,
+            (ticket_id,)
+        )
 
-        connection.close()
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="Senha não encontrada ou não está em atendimento."
+            )
+
+        connection.commit()
 
         return {
-            "success": False,
-            "message": "Senha não encontrada ou não está em atendimento."
+            "success": True,
+            "message": "Atendimento finalizado."
         }
 
-    connection.commit()
-    connection.close()
+    finally:
 
-    return {
-        "success": True,
-        "message": "Atendimento finalizado."
-    }
+        connection.close()
