@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from app.database.database import get_connection
 
 from app.database.queries import (
+    SKIP_TICKET,
     FINISH_TICKET,
     GET_CURRENT_TICKET,
     GET_NEXT_PRIORITY,
@@ -128,6 +129,39 @@ def finish_ticket(ticket_id):
         return {
             "success": True,
             "message": "Atendimento finalizado."
+        }
+
+    finally:
+
+        connection.close()
+
+# ============================
+# Pular senha atual "ausente"
+# ============================
+
+def skip_ticket(ticket_id):
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            SKIP_TICKET,
+            (ticket_id,)
+        )
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="Senha não encontrada ou não está em atendimento."
+            )
+
+        connection.commit()
+
+        return {
+            "success": True,
+            "message": "Senha marcada como ausente."
         }
 
     finally:

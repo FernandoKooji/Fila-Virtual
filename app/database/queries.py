@@ -89,6 +89,16 @@ WHERE id = ?
 AND status='em_atendimento';
 """
 
+#estado: ausente
+SKIP_TICKET = """
+UPDATE tickets
+SET
+    status = 'ausente',
+    finished_at = CURRENT_TIMESTAMP
+WHERE id = ?
+AND status = 'em_atendimento';
+"""
+
 #---consulta de INSERT---
 
 INSERT_TICKET = """
