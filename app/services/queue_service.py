@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from app.database.database import get_connection
 
 from app.database.queries import (
+    CANCEL_TICKET,
     SKIP_TICKET,
     FINISH_TICKET,
     GET_CURRENT_TICKET,
@@ -162,6 +163,39 @@ def skip_ticket(ticket_id):
         return {
             "success": True,
             "message": "Senha marcada como ausente."
+        }
+
+    finally:
+
+        connection.close()
+
+# ============================
+# Cancelar senha (cliente)
+# ============================
+
+def cancel_ticket(ticket_id):
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            CANCEL_TICKET,
+            (ticket_id,)
+        )
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="Senha não encontrada ou não pode ser cancelada."
+            )
+
+        connection.commit()
+
+        return {
+            "success": True,
+            "message": "Senha cancelada com sucesso."
         }
 
     finally:

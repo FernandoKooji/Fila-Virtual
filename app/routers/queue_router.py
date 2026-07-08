@@ -17,6 +17,7 @@ from app.services.queue_service import (
     call_next,
     finish_ticket,
     skip_ticket,
+    cancel_ticket,
     get_current_ticket
 )
 
@@ -59,3 +60,10 @@ def finish_ticket_route(ticket: FinishTicketRequest):
 )
 def skip_ticket_route(ticket: FinishTicketRequest):
     return skip_ticket(ticket.id)
+
+@router.post(
+    "/cancel",
+    response_model=MessageResponse
+)
+def cancel_ticket_route(ticket: FinishTicketRequest):
+    return cancel_ticket(ticket.id)

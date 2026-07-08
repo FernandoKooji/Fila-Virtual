@@ -1,9 +1,6 @@
-
-
 #===SQL REUTILIZAVEIS===
 
 #---criacao de senhas---
-
 GET_LAST_PRIORITY = """
 SELECT last_priority_number
 FROM system_state
@@ -17,7 +14,6 @@ WHERE id = 1;
 """
 
 #---procurar proxima senha e mudanca de estado para aguardando---
-
 GET_CURRENT_TICKET = """
 SELECT
     id,
@@ -52,7 +48,6 @@ LIMIT 1;
 #---atualiza---
 
 #o contador das senhas
-
 UPDATE_LAST_NORMAL = """
 UPDATE system_state
 SET last_normal_number = ?
@@ -66,7 +61,6 @@ WHERE id = 1;
 """
 
 #estado: em atendimento
-
 CALL_TICKET = """
 UPDATE tickets
 SET
@@ -99,8 +93,18 @@ WHERE id = ?
 AND status = 'em_atendimento';
 """
 
-#---consulta de INSERT---
+#cancelar uma senha
+CANCEL_TICKET = """
+UPDATE tickets
+SET
+    status = 'cancelado',
+    finished_at = CURRENT_TIMESTAMP
+WHERE
+    id = ?
+    AND status = 'aguardando';
+"""
 
+#---consulta de INSERT---
 INSERT_TICKET = """
 INSERT INTO tickets (
     ticket_code,
