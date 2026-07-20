@@ -16,12 +16,13 @@ from app.schemas.queue import (
 )
 
 from app.services.queue_service import (
-    get_ticket_position,
     call_next,
     finish_ticket,
     skip_ticket,
     cancel_ticket,
-    get_current_ticket
+    get_current_ticket,
+    get_queue_status,
+    get_ticket_position
 )
 
 # ============================
@@ -77,3 +78,10 @@ def cancel_ticket_route(ticket: FinishTicketRequest):
 )
 def ticket_position_route(ticket_code: str):
     return get_ticket_position(ticket_code)
+
+@router.get(
+    "/status",
+    response_model=QueueStatusResponse
+)
+def queue_status_route():
+    return get_queue_status()

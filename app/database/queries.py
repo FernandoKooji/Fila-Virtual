@@ -128,3 +128,11 @@ FROM tickets
 WHERE status = 'aguardando'
 ORDER BY created_at;
 """
+
+#busca senha em atendimento
+GET_CURRENT_TICKET_CODE = """
+SELECT ticket_code
+FROM tickets
+WHERE status = 'em_atendimento'
+LIMIT 1;
+"""

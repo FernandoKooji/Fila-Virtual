@@ -22,11 +22,14 @@ class CurrentTicketResponse(BaseModel):
 
 class QueueStatusResponse(BaseModel):
     success: bool
-    current_ticket: Optional[str] = None
-    waiting_priority: int
-    waiting_normal: int
-    total_waiting: int
 
+    current_ticket: str | None = None
+
+    waiting_priority: int
+
+    waiting_normal: int
+
+    total_waiting: int
 
 # ============================
 # Posição da senha

@@ -7,18 +7,19 @@ from fastapi import HTTPException
 from app.database.database import get_connection
 
 from app.database.queries import (
-    GET_TICKET_POSITION,
-    CANCEL_TICKET,
-    SKIP_TICKET,
-    FINISH_TICKET,
+    GET_WAITING_TICKETS,
     GET_CURRENT_TICKET,
     CALL_TICKET,
-    GET_WAITING_TICKETS
+    FINISH_TICKET,
+    SKIP_TICKET,
+    CANCEL_TICKET
 )
 
 from app.utils.queue_engine import (
     sort_queue,
-    next_ticket
+    next_ticket,
+    ticket_position,
+    queue_statistics
 )
 
 
@@ -76,16 +77,25 @@ def get_queue_status():
 
     try:
 
+        # Busca todas as senhas aguardando
         cursor.execute(GET_WAITING_TICKETS)
-
         waiting = cursor.fetchall()
 
         ordered_queue = sort_queue(waiting)
 
         stats = queue_statistics(ordered_queue)
 
+        # Busca atendimento atual
+        cursor.execute(GET_CURRENT_TICKET_CODE)
+        current = cursor.fetchone()
+
         return {
             "success": True,
+            "current_ticket": (
+                current["ticket_code"]
+                if current
+                else None
+            ),
             **stats
         }
 
