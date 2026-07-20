@@ -27,24 +27,6 @@ ORDER BY called_at DESC
 LIMIT 1;
 """
 
-GET_NEXT_PRIORITY = """
-SELECT *
-FROM tickets
-WHERE ticket_type = 'P'
-AND status = 'aguardando'
-ORDER BY created_at
-LIMIT 1;
-"""
-
-GET_NEXT_NORMAL = """
-SELECT *
-FROM tickets
-WHERE ticket_type = 'N'
-AND status = 'aguardando'
-ORDER BY created_at
-LIMIT 1;
-"""
-
 #---atualiza---
 
 #o contador das senhas
@@ -134,11 +116,15 @@ FROM tickets
 WHERE ticket_code = ?;
 """
 
-#contador de senhas na frente
-COUNT_TICKETS_AHEAD = """
-SELECT COUNT(*) AS total
+#devolve todas as senhas aguardando
+GET_WAITING_TICKETS = """
+SELECT
+    id,
+    ticket_code,
+    ticket_type,
+    status,
+    created_at
 FROM tickets
-WHERE
-    status = 'aguardando'
-    AND created_at < ?
+WHERE status = 'aguardando'
+ORDER BY created_at;
 """

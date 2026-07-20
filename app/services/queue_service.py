@@ -8,14 +8,17 @@ from app.database.database import get_connection
 
 from app.database.queries import (
     GET_TICKET_POSITION,
-    COUNT_TICKETS_AHEAD,
     CANCEL_TICKET,
     SKIP_TICKET,
     FINISH_TICKET,
     GET_CURRENT_TICKET,
-    GET_NEXT_PRIORITY,
-    GET_NEXT_NORMAL,
-    CALL_TICKET
+    CALL_TICKET,
+    GET_WAITING_TICKETS
+)
+
+from app.utils.queue_engine import (
+    sort_queue,
+    next_ticket
 )
 
 
@@ -53,6 +56,43 @@ def get_current_ticket():
 
         connection.close()
 
+# ============================
+# Resumo da fila
+# ============================
+
+"""
+Ela responde perguntas como:
+
+Qual senha está em atendimento?
+Quantas senhas preferenciais estão aguardando?
+Quantas senhas normais estão aguardando?
+Quantas pessoas há na fila ao todo?
+"""
+
+def get_queue_status():
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(GET_WAITING_TICKETS)
+
+        waiting = cursor.fetchall()
+
+        ordered_queue = sort_queue(waiting)
+
+        stats = queue_statistics(ordered_queue)
+
+        return {
+            "success": True,
+            **stats
+        }
+
+    finally:
+
+        connection.close()
+
 
 # ============================
 # Chamar próxima senha
@@ -65,17 +105,13 @@ def call_next():
 
     try:
 
-        # Procura senha preferencial
-        cursor.execute(GET_NEXT_PRIORITY)
+        cursor.execute(GET_WAITING_TICKETS)
 
-        ticket = cursor.fetchone()
+        waiting_tickets = cursor.fetchall()
 
-        # Caso não exista, procura senha normal
-        if ticket is None:
+        ordered_queue = sort_queue(waiting_tickets)
 
-            cursor.execute(GET_NEXT_NORMAL)
-
-            ticket = cursor.fetchone()
+        ticket = next_ticket(ordered_queue)
 
         # Nenhuma senha aguardando
         if ticket is None:
@@ -215,42 +251,29 @@ def get_ticket_position(ticket_code):
 
     try:
 
-        cursor.execute(
-            GET_TICKET_POSITION,
-            (ticket_code,)
+        cursor.execute(GET_WAITING_TICKETS)
+
+        waiting = cursor.fetchall()
+
+        ordered_queue = sort_queue(waiting)
+
+        position = ticket_position(
+            ordered_queue,
+            ticket_code
         )
 
-        ticket = cursor.fetchone()
-
-        if ticket is None:
+        if position is None:
             raise HTTPException(
                 status_code=404,
-                detail="Senha não encontrada."
+                detail="Senha não encontrada na fila."
             )
-
-        if ticket["status"] != "aguardando":
-
-            return {
-                "success": True,
-                "ticket_code": ticket["ticket_code"],
-                "status": ticket["status"],
-                "position": 0,
-                "people_ahead": 0
-            }
-
-        cursor.execute(
-            COUNT_TICKETS_AHEAD,
-            (ticket["created_at"],)
-        )
-
-        ahead = cursor.fetchone()["total"]
 
         return {
             "success": True,
-            "ticket_code": ticket["ticket_code"],
-            "status": ticket["status"],
-            "position": ahead + 1,
-            "people_ahead": ahead
+            "ticket_code": ticket_code,
+            "status": "aguardando",
+            "position": position["position"],
+            "people_ahead": position["people_ahead"]
         }
 
     finally:
