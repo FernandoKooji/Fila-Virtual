@@ -119,3 +119,26 @@ VALUES (
     CURRENT_TIMESTAMP
 );
 """
+
+#---Consulta posicao de senha (cliente)---
+
+#busca os dados da senha informada.
+GET_TICKET_POSITION = """
+SELECT
+    id,
+    ticket_code,
+    ticket_type,
+    status,
+    created_at
+FROM tickets
+WHERE ticket_code = ?;
+"""
+
+#contador de senhas na frente
+COUNT_TICKETS_AHEAD = """
+SELECT COUNT(*) AS total
+FROM tickets
+WHERE
+    status = 'aguardando'
+    AND created_at < ?
+"""

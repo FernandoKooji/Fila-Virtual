@@ -7,6 +7,8 @@ from fastapi import HTTPException
 from app.database.database import get_connection
 
 from app.database.queries import (
+    GET_TICKET_POSITION,
+    COUNT_TICKETS_AHEAD,
     CANCEL_TICKET,
     SKIP_TICKET,
     FINISH_TICKET,
@@ -196,6 +198,59 @@ def cancel_ticket(ticket_id):
         return {
             "success": True,
             "message": "Senha cancelada com sucesso."
+        }
+
+    finally:
+
+        connection.close()
+
+# ============================
+# Consulta posicao de senha (cliente)
+# ============================
+
+def get_ticket_position(ticket_code):
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            GET_TICKET_POSITION,
+            (ticket_code,)
+        )
+
+        ticket = cursor.fetchone()
+
+        if ticket is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Senha não encontrada."
+            )
+
+        if ticket["status"] != "aguardando":
+
+            return {
+                "success": True,
+                "ticket_code": ticket["ticket_code"],
+                "status": ticket["status"],
+                "position": 0,
+                "people_ahead": 0
+            }
+
+        cursor.execute(
+            COUNT_TICKETS_AHEAD,
+            (ticket["created_at"],)
+        )
+
+        ahead = cursor.fetchone()["total"]
+
+        return {
+            "success": True,
+            "ticket_code": ticket["ticket_code"],
+            "status": ticket["status"],
+            "position": ahead + 1,
+            "people_ahead": ahead
         }
 
     finally:
