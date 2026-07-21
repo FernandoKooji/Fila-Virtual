@@ -1,40 +1,36 @@
-// =========================
-// Elementos
-// =========================
+// ==========================================
+// Elementos da página
+// ==========================================
 
-const homeScreen =
-    document.getElementById("home-screen");
+const homeScreen = document.getElementById("home-screen");
 
-const ticketScreen =
-    document.getElementById("ticket-screen");
+const ticketScreen = document.getElementById("ticket-screen");
 
-const btnEnter =
-    document.getElementById("btn-enter");
+const btnEnter = document.getElementById("btn-enter");
 
-const btnCancel =
-    document.getElementById("btn-cancel");
+const btnCancel = document.getElementById("btn-cancel");
 
-const modal =
-    document.getElementById("ticket-modal");
+const modal = document.getElementById("ticket-modal");
 
-const btnConfirm =
-    document.getElementById("btn-confirm");
+const btnConfirm = document.getElementById("btn-confirm");
 
-const btnCloseModal =
-    document.getElementById("btn-close-modal");
+const btnCloseModal = document.getElementById("btn-close-modal");
 
-// =========================
-// Variáveis
-// =========================
+const ticketCodeText = document.getElementById("ticket-code");
+
+
+// ==========================================
+// Variáveis globais
+// ==========================================
 
 let ticketCode = null;
 
 
-// =========================
+// ==========================================
 // Interface
-// =========================
+// ==========================================
 
-function showHome(){
+function showHome() {
 
     homeScreen.style.display = "block";
 
@@ -42,7 +38,7 @@ function showHome(){
 
 }
 
-function showTicket(){
+function showTicket() {
 
     homeScreen.style.display = "none";
 
@@ -62,15 +58,17 @@ function closeModal() {
 
 }
 
-function checkLocalStorage(){
+function checkLocalStorage() {
 
     ticketCode = localStorage.getItem("ticket_code");
 
-    if(ticketCode){
+    if (ticketCode) {
+
+        ticketCodeText.textContent = ticketCode;
 
         showTicket();
 
-    }else{
+    } else {
 
         showHome();
 
@@ -79,67 +77,98 @@ function checkLocalStorage(){
 }
 
 
-// =========================
+// ==========================================
 // API
-// =========================
+// ==========================================
 
-async function createTicket(){
+async function createTicket() {
 
     showModal();
 
 }
 
-async function confirmTicket(){
+
+async function confirmTicket() {
 
     const selectedType = document.querySelector(
-
         'input[name="ticket-type"]:checked'
-
     ).value;
 
-    console.log(
+    try {
 
-        "Tipo selecionado:",
+        const response = await fetch("/tickets/", {
 
-        selectedType
+            method: "POST",
 
-    );
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-    closeModal();
+            body: JSON.stringify({
+                ticket_type: selectedType
+            })
+
+        });
+
+        if (!response.ok) {
+
+            throw new Error("Erro ao criar a senha.");
+
+        }
+        
+        const data = await response.json();
+
+        console.log(data);
+
+        if (data.success) {
+
+            localStorage.setItem(
+                "ticket_code",
+                data.ticket_code
+            );
+
+            ticketCode = data.ticket_code;
+
+            ticketCodeText.textContent = ticketCode;
+
+            closeModal();
+
+            showTicket();
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+    }
 
 }
 
-// =========================
+
+// ==========================================
 // Eventos
-// =========================
+// ==========================================
 
 btnEnter.addEventListener(
-
     "click",
-
     createTicket
-
-);
-
-btnCloseModal.addEventListener(
-
-    "click",
-
-    closeModal
-
 );
 
 btnConfirm.addEventListener(
-
     "click",
-
     confirmTicket
+);
 
+btnCloseModal.addEventListener(
+    "click",
+    closeModal
 );
 
 
-// =========================
+// ==========================================
 // Inicialização
-// =========================
+// ==========================================
 
 checkLocalStorage();
