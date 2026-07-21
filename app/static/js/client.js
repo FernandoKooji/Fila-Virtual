@@ -14,6 +14,14 @@ const btnEnter =
 const btnCancel =
     document.getElementById("btn-cancel");
 
+const modal =
+    document.getElementById("ticket-modal");
+
+const btnConfirm =
+    document.getElementById("btn-confirm");
+
+const btnCloseModal =
+    document.getElementById("btn-close-modal");
 
 // =========================
 // Variáveis
@@ -42,6 +50,18 @@ function showTicket(){
 
 }
 
+function showModal() {
+
+    modal.style.display = "flex";
+
+}
+
+function closeModal() {
+
+    modal.style.display = "none";
+
+}
+
 function checkLocalStorage(){
 
     ticketCode = localStorage.getItem("ticket_code");
@@ -65,10 +85,29 @@ function checkLocalStorage(){
 
 async function createTicket(){
 
-    console.log("Criar senha");
+    showModal();
 
 }
 
+async function confirmTicket(){
+
+    const selectedType = document.querySelector(
+
+        'input[name="ticket-type"]:checked'
+
+    ).value;
+
+    console.log(
+
+        "Tipo selecionado:",
+
+        selectedType
+
+    );
+
+    closeModal();
+
+}
 
 // =========================
 // Eventos
@@ -79,6 +118,22 @@ btnEnter.addEventListener(
     "click",
 
     createTicket
+
+);
+
+btnCloseModal.addEventListener(
+
+    "click",
+
+    closeModal
+
+);
+
+btnConfirm.addEventListener(
+
+    "click",
+
+    confirmTicket
 
 );
 
