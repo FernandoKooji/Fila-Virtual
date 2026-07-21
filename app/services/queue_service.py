@@ -86,7 +86,7 @@ def get_queue_status():
         stats = queue_statistics(ordered_queue)
 
         # Busca atendimento atual
-        cursor.execute(GET_CURRENT_TICKET_CODE)
+        cursor.execute(GET_CURRENT_TICKET)
         current = cursor.fetchone()
 
         return {

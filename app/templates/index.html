@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Fila Virtual</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ========================= -->
+    <!-- Tela Inicial -->
+    <!-- ========================= -->
+
+    <section id="home-screen">
+
+        <h1>Fila Virtual</h1>
+
+        <p>
+            Senha atual:
+            <span id="current-ticket">--</span>
+        </p>
+
+        <p>
+            Pessoas aguardando:
+            <span id="waiting-total">--</span>
+        </p>
+
+        <p>
+            Tempo médio:
+            <span id="average-time">--</span>
+        </p>
+
+        <button id="btn-enter">
+
+            Entrar na fila
+
+        </button>
+
+    </section>
+
+
+    <!-- ========================= -->
+    <!-- Tela acompanhamento -->
+    <!-- ========================= -->
+
+    <section
+        id="ticket-screen"
+        style="display:none;"
+    >
+
+        <h2>Sua senha</h2>
+
+        <h1 id="ticket-code">
+
+            N000
+
+        </h1>
+
+        <p>
+
+            Status:
+            <span id="ticket-status"></span>
+
+        </p>
+
+        <p>
+
+            Posição:
+            <span id="ticket-position"></span>
+
+        </p>
+
+        <p>
+
+            Pessoas na frente:
+            <span id="people-ahead"></span>
+
+        </p>
+
+        <button id="btn-cancel">
+
+            Cancelar senha
+
+        </button>
+
+    </section>
+
+</div>
+
+<script src="/static/js/client.js"></script>
+
+</body>
+
+</html>
