@@ -211,27 +211,25 @@ async function loadTicketPosition() {
 
 }
 
+let refreshInterval = null;
+
 function startAutoRefresh() {
 
-    let refreshInterval = null;
+    if (refreshInterval) {
 
-    function startAutoRefresh() {
+        clearInterval(refreshInterval);
 
-        if (refreshInterval) {
+    }
 
-            clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+
+        if (ticketCode) {
+
+            loadTicketPosition();
 
         }
 
-        refreshInterval = setInterval(
-
-            loadTicketPosition,
-
-            5000
-
-        );
-
-    }
+    }, 5000);
 
 }
 
