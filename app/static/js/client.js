@@ -90,6 +90,36 @@ async function checkLocalStorage() {
 }
 
 // ==========================================
+// Limpa sessão da senha
+// ==========================================
+
+function clearTicketSession() {
+
+    localStorage.removeItem("ticket_code");
+
+    ticketCode = null;
+
+    ticketCodeText.textContent = "";
+
+    ticketStatusText.textContent = "";
+
+    ticketPositionText.textContent = "";
+
+    peopleAheadText.textContent = "";
+
+    if (refreshInterval) {
+
+        clearInterval(refreshInterval);
+
+        refreshInterval = null;
+
+    }
+
+    showHome();
+
+}
+
+// ==========================================
 // API
 // ==========================================
 
@@ -151,6 +181,12 @@ async function confirmTicket() {
 
         }
 
+        else {
+
+            clearTicketSession();
+
+        }
+
     }
     catch (error) {
 
@@ -171,17 +207,25 @@ async function loadTicketPosition() {
     try {
 
         const response = await fetch(
-
             `/queue/position/${ticketCode}`
-
         );
+
+        // Ticket não existe mais
+
+        if (response.status === 404) {
+
+            clearTicketSession();
+
+            return;
+
+        }
+
+        // Outro erro
 
         if (!response.ok) {
 
             throw new Error(
-
                 "Erro ao consultar posição."
-
             );
 
         }
@@ -259,18 +303,7 @@ async function cancelTicket() {
 
         clearInterval(refreshInterval);
 
-        localStorage.removeItem(
-
-            "ticket_code"
-
-        );
-
-        ticketCode = null;
-
-        showHome();
-
-        startAutoRefresh();
-
+        clearTicketSession();
     }
 
     catch(error){
