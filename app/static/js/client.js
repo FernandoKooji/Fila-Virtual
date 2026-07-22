@@ -18,6 +18,12 @@ const btnCloseModal = document.getElementById("btn-close-modal");
 
 const ticketCodeText = document.getElementById("ticket-code");
 
+const ticketStatusText = document.getElementById("ticket-status");
+
+const ticketPositionText = document.getElementById("ticket-position");
+
+const peopleAheadText = document.getElementById("people-ahead");
+
 
 // ==========================================
 // Variáveis globais
@@ -58,17 +64,24 @@ function closeModal() {
 
 }
 
-function checkLocalStorage() {
+async function checkLocalStorage() {
 
-    ticketCode = localStorage.getItem("ticket_code");
+    ticketCode = localStorage.getItem(
+        "ticket_code"
+    );
 
     if (ticketCode) {
 
-        ticketCodeText.textContent = ticketCode;
+        ticketCodeText.textContent =
+            ticketCode;
 
         showTicket();
 
-    } else {
+        await loadTicketPosition();
+
+    }
+
+    else {
 
         showHome();
 
@@ -109,7 +122,8 @@ async function confirmTicket() {
             })
 
         });
-
+        
+        //verifica se API responde correto
         if (!response.ok) {
 
             throw new Error("Erro ao criar a senha.");
@@ -135,6 +149,8 @@ async function confirmTicket() {
 
             showTicket();
 
+            await loadTicketPosition();
+
         }
 
     }
@@ -146,6 +162,78 @@ async function confirmTicket() {
 
 }
 
+async function loadTicketPosition() {
+
+    if (!ticketCode) {
+
+        return;
+
+    }
+
+    try {
+
+        const response = await fetch(
+
+            `/queue/position/${ticketCode}`
+
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+
+                "Erro ao consultar posição."
+
+            );
+
+        }
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ticketStatusText.textContent =
+            data.status;
+
+        ticketPositionText.textContent =
+            data.position + "º";
+
+        peopleAheadText.textContent =
+            data.people_ahead;
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+function startAutoRefresh() {
+
+    let refreshInterval = null;
+
+    function startAutoRefresh() {
+
+        if (refreshInterval) {
+
+            clearInterval(refreshInterval);
+
+        }
+
+        refreshInterval = setInterval(
+
+            loadTicketPosition,
+
+            5000
+
+        );
+
+    }
+
+}
 
 // ==========================================
 // Eventos
@@ -172,3 +260,5 @@ btnCloseModal.addEventListener(
 // ==========================================
 
 checkLocalStorage();
+
+startAutoRefresh();
