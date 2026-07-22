@@ -1,15 +1,31 @@
+# ============================
+# Imports
+# ============================
+
 from fastapi import HTTPException
 
 from app.database.database import get_connection
+
+from app.utils.constants import (
+    NORMAL,
+    PRIORITY,
+    NORMAL_PREFIX,
+    PRIORITY_PREFIX,
+    STATUS_WAITING
+)
 
 from app.database.queries import (
     GET_LAST_NORMAL,
     GET_LAST_PRIORITY,
     UPDATE_LAST_NORMAL,
     UPDATE_LAST_PRIORITY,
-    INSERT_TICKET
+    INSERT_TICKET,
+    CANCEL_TICKET
 )
 
+# ============================
+# Functions
+# ============================
 
 def create_ticket(ticket_type):
 
@@ -26,13 +42,13 @@ def create_ticket(ticket_type):
     try:
 
         # Configuração conforme o tipo da senha
-        if ticket_type == "N":
+        if ticket_type == NORMAL:
 
             config = {
                 "get": GET_LAST_NORMAL,
                 "update": UPDATE_LAST_NORMAL,
                 "column": "last_normal_number",
-                "prefix": "N"
+                "prefix": NORMAL_PREFIX
             }
 
         else:
@@ -41,7 +57,7 @@ def create_ticket(ticket_type):
                 "get": GET_LAST_PRIORITY,
                 "update": UPDATE_LAST_PRIORITY,
                 "column": "last_priority_number",
-                "prefix": "P"
+                "prefix": PRIORITY_PREFIX
             }
 
         # Busca o último número utilizado
@@ -85,7 +101,47 @@ def create_ticket(ticket_type):
             "id": ticket_id,
             "ticket_code": ticket_code,
             "ticket_type": ticket_type,
-            "status": "aguardando"
+            "status": STATUS_WAITING
+        }
+
+    finally:
+
+        connection.close()
+
+def cancel_ticket(ticket_code):
+
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+
+            CANCEL_TICKET,
+
+            (ticket_code,)
+
+        )
+
+        if cursor.rowcount == 0:
+
+            raise HTTPException(
+
+                status_code=404,
+
+                detail="Senha não encontrada ou não pode ser cancelada."
+
+            )
+
+        connection.commit()
+
+        return {
+
+            "success": True,
+
+            "message": "Senha cancelada."
+
         }
 
     finally:

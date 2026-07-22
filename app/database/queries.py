@@ -27,7 +27,9 @@ ORDER BY called_at DESC
 LIMIT 1;
 """
 
-#---atualiza---
+# ============================
+# Atualizacao
+# ============================
 
 #o contador das senhas
 UPDATE_LAST_NORMAL = """
@@ -102,9 +104,11 @@ VALUES (
 );
 """
 
-#---Consulta posicao de senha (cliente)---
+# ============================
+# Consulta posicao de senha (CLIENTE)
+# ============================
 
-#busca os dados da senha informada.
+# Busca dados da senha informada
 GET_TICKET_POSITION = """
 SELECT
     id,
@@ -116,7 +120,7 @@ FROM tickets
 WHERE ticket_code = ?;
 """
 
-#devolve todas as senhas aguardando
+# Devolve senhas aguardando
 GET_WAITING_TICKETS = """
 SELECT
     id,
@@ -129,10 +133,21 @@ WHERE status = 'aguardando'
 ORDER BY created_at;
 """
 
-#busca senha em atendimento
+# Buscar senha em atendimento
 GET_CURRENT_TICKET_CODE = """
 SELECT ticket_code
 FROM tickets
 WHERE status = 'em_atendimento'
 LIMIT 1;
+"""
+
+# Cancelar senha
+CANCEL_TICKET = """
+UPDATE tickets
+SET
+    status = 'cancelado',
+    finished_at = CURRENT_TIMESTAMP
+WHERE
+    ticket_code = ?
+    AND status = 'aguardando';
 """

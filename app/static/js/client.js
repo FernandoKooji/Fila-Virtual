@@ -89,7 +89,6 @@ async function checkLocalStorage() {
 
 }
 
-
 // ==========================================
 // API
 // ==========================================
@@ -99,7 +98,6 @@ async function createTicket() {
     showModal();
 
 }
-
 
 async function confirmTicket() {
 
@@ -211,6 +209,78 @@ async function loadTicketPosition() {
 
 }
 
+async function cancelTicket() {
+
+    if (!ticketCode) {
+
+        return;
+
+    }
+
+    const confirmed = confirm(
+
+        "Deseja realmente cancelar sua senha?"
+
+    );
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+    try {
+
+        const response = await fetch(
+
+            `/tickets/${ticketCode}`,
+
+            {
+
+                method: "DELETE"
+
+            }
+
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+
+                "Erro ao cancelar senha."
+
+            );
+
+        }
+
+        const data = await response.json();
+
+        console.log(data);
+
+        clearInterval(refreshInterval);
+
+        localStorage.removeItem(
+
+            "ticket_code"
+
+        );
+
+        ticketCode = null;
+
+        showHome();
+
+        startAutoRefresh();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
 let refreshInterval = null;
 
 function startAutoRefresh() {
@@ -252,6 +322,13 @@ btnCloseModal.addEventListener(
     closeModal
 );
 
+btnCancel.addEventListener(
+
+    "click",
+
+    cancelTicket
+
+);
 
 // ==========================================
 // Inicialização

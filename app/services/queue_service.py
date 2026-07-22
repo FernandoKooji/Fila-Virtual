@@ -6,6 +6,13 @@ from fastapi import HTTPException
 
 from app.database.database import get_connection
 
+from app.utils.constants import (
+    STATUS_IN_SERVICE,
+    STATUS_FINISHED,
+    STATUS_WAITING,
+    STATUS_ABSENT
+)
+
 from app.database.queries import (
     GET_WAITING_TICKETS,
     GET_CURRENT_TICKET,
@@ -143,7 +150,7 @@ def call_next():
             "id": ticket["id"],
             "ticket_code": ticket["ticket_code"],
             "ticket_type": ticket["ticket_type"],
-            "status": "em_atendimento"
+            "status": STATUS_IN_SERVICE
         }
 
     finally:
