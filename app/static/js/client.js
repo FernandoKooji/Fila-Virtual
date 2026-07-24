@@ -210,6 +210,7 @@ async function loadTicketPosition() {
             `/queue/position/${ticketCode}`
         );
 
+
         // Ticket não existe mais
 
         if (response.status === 404) {
@@ -220,6 +221,7 @@ async function loadTicketPosition() {
 
         }
 
+
         // Outro erro
 
         if (!response.ok) {
@@ -229,7 +231,7 @@ async function loadTicketPosition() {
             );
 
         }
-
+        
         const data = await response.json();
 
         console.log(data);
@@ -256,43 +258,39 @@ async function loadTicketPosition() {
 async function cancelTicket() {
 
     if (!ticketCode) {
-
         return;
-
     }
 
     const confirmed = confirm(
-
         "Deseja realmente cancelar sua senha?"
-
     );
 
     if (!confirmed) {
-
         return;
-
     }
 
     try {
 
         const response = await fetch(
-
             `/tickets/${ticketCode}`,
-
             {
-
                 method: "DELETE"
-
             }
-
         );
+
+        // Ticket já não existe ou foi encerrado
+        if (response.status === 404) {
+
+            clearTicketSession();
+
+            return;
+
+        }
 
         if (!response.ok) {
 
             throw new Error(
-
                 "Erro ao cancelar senha."
-
             );
 
         }
@@ -301,12 +299,12 @@ async function cancelTicket() {
 
         console.log(data);
 
-        clearInterval(refreshInterval);
-
+        // Limpa toda a sessão do cliente
         clearTicketSession();
+
     }
 
-    catch(error){
+    catch (error) {
 
         console.error(error);
 

@@ -10,16 +10,26 @@ from app.utils.constants import (
     STATUS_IN_SERVICE,
     STATUS_FINISHED,
     STATUS_WAITING,
-    STATUS_ABSENT
+    STATUS_ABSENT,
+    STATUS_CANCELLED
 )
 
 from app.database.queries import (
+
+    GET_TICKET,
+
     GET_WAITING_TICKETS,
+
     GET_CURRENT_TICKET,
+
     CALL_TICKET,
+
     FINISH_TICKET,
+
     SKIP_TICKET,
+
     CANCEL_TICKET
+
 )
 
 from app.utils.queue_engine import (
@@ -28,7 +38,6 @@ from app.utils.queue_engine import (
     ticket_position,
     queue_statistics
 )
-
 
 # ============================
 # Atendimento atual
@@ -268,29 +277,56 @@ def get_ticket_position(ticket_code):
 
     try:
 
-        cursor.execute(GET_WAITING_TICKETS)
-
-        waiting = cursor.fetchall()
-
-        ordered_queue = sort_queue(waiting)
-
-        position = ticket_position(
-            ordered_queue,
-            ticket_code
+        # Procura o ticket independentemente do status
+        cursor.execute(
+            GET_TICKET,
+            (ticket_code,)
         )
 
-        if position is None:
+        ticket = cursor.fetchone()
+
+        if ticket is None:
+
             raise HTTPException(
                 status_code=404,
-                detail="Senha não encontrada na fila."
+                detail="Senha não encontrada."
             )
 
+        # Apenas aguardando possui posição
+        if ticket["status"] == STATUS_WAITING:
+
+            cursor.execute(GET_WAITING_TICKETS)
+
+            waiting = cursor.fetchall()
+
+            ordered_queue = sort_queue(waiting)
+
+            position = ticket_position(
+                ordered_queue,
+                ticket_code
+            )
+
+            return {
+                "success": True,
+                "ticket_code": ticket_code,
+                "status": STATUS_WAITING,
+                "position": position["position"],
+                "people_ahead": position["people_ahead"]
+            }
+
+        # Todos os demais estados
         return {
+
             "success": True,
-            "ticket_code": ticket_code,
-            "status": "aguardando",
-            "position": position["position"],
-            "people_ahead": position["people_ahead"]
+
+            "ticket_code": ticket["ticket_code"],
+
+            "status": ticket["status"],
+
+            "position": None,
+
+            "people_ahead": None
+
         }
 
     finally:

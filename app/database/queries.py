@@ -77,17 +77,6 @@ WHERE id = ?
 AND status = 'em_atendimento';
 """
 
-#cancelar uma senha
-CANCEL_TICKET = """
-UPDATE tickets
-SET
-    status = 'cancelado',
-    finished_at = CURRENT_TIMESTAMP
-WHERE
-    id = ?
-    AND status = 'aguardando';
-"""
-
 #---consulta de INSERT---
 INSERT_TICKET = """
 INSERT INTO tickets (
@@ -109,15 +98,30 @@ VALUES (
 # ============================
 
 # Busca dados da senha informada
-GET_TICKET_POSITION = """
+GET_TICKET = """
 SELECT
     id,
     ticket_code,
     ticket_type,
     status,
-    created_at
+    created_at,
+    called_at,
+    finished_at
 FROM tickets
 WHERE ticket_code = ?;
+"""
+
+#calcula posição de tickets aguardando
+GET_WAITING_POSITION = """
+SELECT COUNT(*) + 1 AS position
+FROM tickets
+WHERE
+    status = 'aguardando'
+    AND created_at < (
+        SELECT created_at
+        FROM tickets
+        WHERE ticket_code = ?
+    );
 """
 
 # Devolve senhas aguardando
