@@ -15,21 +15,13 @@ from app.utils.constants import (
 )
 
 from app.database.queries import (
-
     GET_TICKET,
-
     GET_WAITING_TICKETS,
-
     GET_CURRENT_TICKET,
-
     CALL_TICKET,
-
     FINISH_TICKET,
-
     SKIP_TICKET,
-
     CANCEL_TICKET
-
 )
 
 from app.utils.queue_engine import (
@@ -37,6 +29,13 @@ from app.utils.queue_engine import (
     next_ticket,
     ticket_position,
     queue_statistics
+)
+
+from app.utils.ticket_mapper import (
+    build_current_ticket_response,
+    build_position_response,
+    build_message_response,
+    build_ticket_response
 )
 
 # ============================
@@ -60,14 +59,7 @@ def get_current_ticket():
                 detail="Nenhum atendimento em andamento."
             )
 
-        return {
-            "success": True,
-            "id": ticket["id"],
-            "ticket_code": ticket["ticket_code"],
-            "ticket_type": ticket["ticket_type"],
-            "status": ticket["status"],
-            "called_at": ticket["called_at"]
-        }
+        return build_current_ticket_response(ticket)
 
     finally:
 
@@ -154,14 +146,12 @@ def call_next():
 
         connection.commit()
 
-        return {
-            "success": True,
-            "id": ticket["id"],
-            "ticket_code": ticket["ticket_code"],
-            "ticket_type": ticket["ticket_type"],
-            "status": STATUS_IN_SERVICE
-        }
+        ticket = dict(ticket)
 
+        ticket["status"] = STATUS_IN_SERVICE
+
+        return build_ticket_response(ticket)
+    
     finally:
 
         connection.close()
@@ -191,10 +181,9 @@ def finish_ticket(ticket_id):
 
         connection.commit()
 
-        return {
-            "success": True,
-            "message": "Atendimento finalizado."
-        }
+        return build_message_response(
+            "Atendimento finalizado."
+        )
 
     finally:
 
@@ -224,10 +213,9 @@ def skip_ticket(ticket_id):
 
         connection.commit()
 
-        return {
-            "success": True,
-            "message": "Senha marcada como ausente."
-        }
+        return build_message_response(
+            "Senha marcada como ausente."
+        )
 
     finally:
 
@@ -257,10 +245,9 @@ def cancel_ticket(ticket_id):
 
         connection.commit()
 
-        return {
-            "success": True,
-            "message": "Senha cancelada com sucesso."
-        }
+        return build_message_response(
+            "Senha cancelada com sucesso."
+        )
 
     finally:
 
@@ -306,28 +293,15 @@ def get_ticket_position(ticket_code):
                 ticket_code
             )
 
-            return {
-                "success": True,
-                "ticket_code": ticket_code,
-                "status": STATUS_WAITING,
-                "position": position["position"],
-                "people_ahead": position["people_ahead"]
-            }
+            ticket = dict(ticket)
+
+            return build_position_response(
+                ticket,
+                position
+            )
 
         # Todos os demais estados
-        return {
-
-            "success": True,
-
-            "ticket_code": ticket["ticket_code"],
-
-            "status": ticket["status"],
-
-            "position": None,
-
-            "people_ahead": None
-
-        }
+        return build_position_response(ticket)
 
     finally:
 

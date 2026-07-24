@@ -23,6 +23,11 @@ from app.database.queries import (
     CANCEL_TICKET
 )
 
+from app.utils.ticket_mapper import (
+    build_ticket_response,
+    build_message_response
+)
+
 # ============================
 # Functions
 # ============================
@@ -96,13 +101,14 @@ def create_ticket(ticket_type):
 
         connection.commit()
 
-        return {
-            "success": True,
+        ticket = {
             "id": ticket_id,
             "ticket_code": ticket_code,
             "ticket_type": ticket_type,
             "status": STATUS_WAITING
         }
+
+        return build_ticket_response(ticket)
 
     finally:
 
@@ -136,13 +142,9 @@ def cancel_ticket(ticket_code):
 
         connection.commit()
 
-        return {
-
-            "success": True,
-
-            "message": "Senha cancelada."
-
-        }
+        return build_message_response(
+            "Senha cancelada com sucesso."
+        )
 
     finally:
 
