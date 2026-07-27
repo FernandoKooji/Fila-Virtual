@@ -23,7 +23,7 @@ from app.database.queries import (
     CANCEL_TICKET
 )
 
-from app.utils.ticket_mapper import (
+from app.utils.response_mapper import (
     build_ticket_response,
     build_message_response
 )

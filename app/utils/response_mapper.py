@@ -1,14 +1,16 @@
 # ==========================================
-# Mapeadores de resposta da API
+# Response Mapper
+# Padronização das respostas da API
 # ==========================================
 
 from app.utils.constants import STATUS_WAITING
 
 
+# ==========================================
+# Ticket
+# ==========================================
+
 def build_ticket_response(ticket):
-    """
-    Retorna um ticket simples.
-    """
 
     return {
         "success": True,
@@ -19,37 +21,48 @@ def build_ticket_response(ticket):
     }
 
 
-def build_current_ticket_response(ticket):
-    """
-    Resposta do atendimento atual.
-    """
+# ==========================================
+# Atendimento atual
+# ==========================================
 
-    return {
-        "success": True,
+def build_current_ticket_response(ticket):
+
+    return build_success_response({
+
         "id": ticket["id"],
         "ticket_code": ticket["ticket_code"],
         "ticket_type": ticket["ticket_type"],
         "status": ticket["status"],
         "called_at": ticket["called_at"]
-    }
 
+    })
+
+
+# ==========================================
+# Consulta de posição
+# ==========================================
 
 def build_position_response(ticket, position=None):
-    """
-    Resposta utilizada pelo Portal do Cliente.
-    """
 
     response = {
+
         "success": True,
+
         "ticket_code": ticket["ticket_code"],
+
         "status": ticket["status"],
+
         "position": None,
+
         "people_ahead": None
+
     }
 
     if (
+
         ticket["status"] == STATUS_WAITING
         and position is not None
+
     ):
 
         response["position"] = position["position"]
@@ -59,12 +72,46 @@ def build_position_response(ticket, position=None):
     return response
 
 
+# ==========================================
+# Mensagem
+# ==========================================
+
 def build_message_response(message):
-    """
-    Resposta simples de sucesso.
-    """
 
     return {
+
         "success": True,
+
         "message": message
+
     }
+
+
+# ==========================================
+# Erro
+# ==========================================
+
+def build_error_response(message):
+
+    return {
+
+        "success": False,
+
+        "message": message
+
+    }
+
+# ==========================================
+# Sucesso genérico
+# ==========================================
+
+def build_success_response(data=None):
+
+    response = {
+        "success": True
+    }
+
+    if data:
+        response.update(data)
+
+    return response

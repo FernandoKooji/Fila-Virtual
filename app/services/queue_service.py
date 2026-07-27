@@ -31,7 +31,7 @@ from app.utils.queue_engine import (
     queue_statistics
 )
 
-from app.utils.ticket_mapper import (
+from app.utils.response_mapper import (
     build_current_ticket_response,
     build_position_response,
     build_message_response,
@@ -87,6 +87,7 @@ def get_queue_status():
 
         # Busca todas as senhas aguardando
         cursor.execute(GET_WAITING_TICKETS)
+
         waiting = cursor.fetchall()
 
         ordered_queue = sort_queue(waiting)
@@ -95,17 +96,20 @@ def get_queue_status():
 
         # Busca atendimento atual
         cursor.execute(GET_CURRENT_TICKET)
+
         current = cursor.fetchone()
 
-        return {
-            "success": True,
+        return build_success_response({
+
             "current_ticket": (
                 current["ticket_code"]
                 if current
                 else None
             ),
+
             **stats
-        }
+
+        })
 
     finally:
 
