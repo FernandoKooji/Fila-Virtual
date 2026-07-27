@@ -121,7 +121,6 @@ def get_queue_status():
 
         connection.close()
 
-
 # ============================
 # Chamar próxima senha
 # ============================
@@ -162,7 +161,6 @@ def call_next():
     finally:
 
         connection.close()
-
 
 # ============================
 # Finalizar atendimento
@@ -296,6 +294,80 @@ def get_ticket_position(ticket_code):
 
         # Todos os demais estados
         return build_position_response(ticket)
+
+    finally:
+
+        connection.close()
+
+# ============================
+# retorna a fila já ordenada
+# ============================
+
+def get_queue_list():
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        # Busca todas as senhas aguardando
+        cursor.execute(GET_WAITING_TICKETS)
+
+        waiting = cursor.fetchall()
+
+        # Ordena utilizando a regra da fila
+        ordered = sort_queue(waiting)
+
+        queue = []
+
+        for index, ticket in enumerate(ordered, start=1):
+
+            queue.append({
+
+                "position": index,
+
+                "id": ticket["id"],
+
+                "ticket_code": ticket["ticket_code"],
+
+                "ticket_type": ticket["ticket_type"]
+
+            })
+
+        return build_success_response({
+
+            "queue": queue
+
+        })
+
+    finally:
+
+        connection.close()
+
+# ============================
+# Rechamar senha
+# ============================
+
+def recall_ticket():
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(GET_CURRENT_TICKET)
+
+        ticket = cursor.fetchone()
+
+        if ticket is None:
+
+            not_found(
+                "Nenhuma senha em atendimento."
+            )
+
+        return build_current_ticket_response(
+            ticket
+        )
 
     finally:
 

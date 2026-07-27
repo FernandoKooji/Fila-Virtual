@@ -22,7 +22,9 @@ from app.services.queue_service import (
     cancel_ticket,
     get_current_ticket,
     get_queue_status,
-    get_ticket_position
+    get_ticket_position,
+    get_queue_list,
+    recall_ticket
 )
 
 # ============================
@@ -85,3 +87,13 @@ def ticket_position_route(ticket_code: str):
 )
 def queue_status_route():
     return get_queue_status()
+
+@router.get("/list")
+def queue_list_route():
+
+    return get_queue_list()
+
+@router.post("/recall")
+def recall_ticket_route():
+
+    return recall_ticket()
