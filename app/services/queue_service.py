@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from app.database.database import get_connection
 
-from app.utils.constants import (
+from app.core.constants import (
     STATUS_IN_SERVICE,
     STATUS_FINISHED,
     STATUS_WAITING,
@@ -31,11 +31,20 @@ from app.utils.queue_engine import (
     queue_statistics
 )
 
-from app.utils.response_mapper import (
+from app.core.response_mapper import (
+    build_success_response,
+    build_ticket_response,
     build_current_ticket_response,
     build_position_response,
-    build_message_response,
-    build_ticket_response
+    build_message_response
+)
+
+from app.core.exceptions import (
+    queue_empty,
+    no_current_ticket,
+    ticket_not_found,
+    ticket_not_found_or_not_in_service,
+    ticket_cannot_be_cancelled
 )
 
 # ============================
@@ -54,10 +63,7 @@ def get_current_ticket():
         ticket = cursor.fetchone()
 
         if ticket is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Nenhum atendimento em andamento."
-            )
+            no_current_ticket()
 
         return build_current_ticket_response(ticket)
 
@@ -137,10 +143,7 @@ def call_next():
 
         # Nenhuma senha aguardando
         if ticket is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Fila vazia."
-            )
+            queue_empty()
 
         # Atualiza o status da senha
         cursor.execute(
@@ -178,10 +181,7 @@ def finish_ticket(ticket_id):
         )
 
         if cursor.rowcount == 0:
-            raise HTTPException(
-                status_code=404,
-                detail="Senha não encontrada ou não está em atendimento."
-            )
+            ticket_not_found_or_not_in_service()
 
         connection.commit()
 
@@ -210,11 +210,7 @@ def skip_ticket(ticket_id):
         )
 
         if cursor.rowcount == 0:
-            raise HTTPException(
-                status_code=404,
-                detail="Senha não encontrada ou não está em atendimento."
-            )
-
+            ticket_not_found_or_not_in_service()
         connection.commit()
 
         return build_message_response(
@@ -242,10 +238,7 @@ def cancel_ticket(ticket_id):
         )
 
         if cursor.rowcount == 0:
-            raise HTTPException(
-                status_code=404,
-                detail="Senha não encontrada ou não pode ser cancelada."
-            )
+            ticket_cannot_be_cancelled()
 
         connection.commit()
 
@@ -278,10 +271,7 @@ def get_ticket_position(ticket_code):
 
         if ticket is None:
 
-            raise HTTPException(
-                status_code=404,
-                detail="Senha não encontrada."
-            )
+            ticket_not_found()
 
         # Apenas aguardando possui posição
         if ticket["status"] == STATUS_WAITING:

@@ -3,7 +3,7 @@
 # Padronização das respostas da API
 # ==========================================
 
-from app.utils.constants import STATUS_WAITING
+from app.core.constants import STATUS_WAITING
 
 
 # ==========================================

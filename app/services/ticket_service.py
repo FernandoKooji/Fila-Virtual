@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from app.database.database import get_connection
 
-from app.utils.constants import (
+from app.core.constants import (
     NORMAL,
     PRIORITY,
     NORMAL_PREFIX,
@@ -23,9 +23,18 @@ from app.database.queries import (
     CANCEL_TICKET
 )
 
-from app.utils.response_mapper import (
+from app.core.response_mapper import (
     build_ticket_response,
     build_message_response
+)
+
+from app.core.exceptions import (
+    queue_empty,
+    no_current_ticket,
+    ticket_not_found,
+    ticket_not_found_or_not_in_service,
+    ticket_cannot_be_cancelled,
+    invalid_ticket_type
 )
 
 # ============================
@@ -36,10 +45,7 @@ def create_ticket(ticket_type):
 
     # Valida o tipo de senha antes de acessar o banco
     if ticket_type not in ("N", "P"):
-        raise HTTPException(
-            status_code=400,
-            detail="Tipo de senha inválido."
-        )
+        invalid_ticket_type()
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -132,13 +138,7 @@ def cancel_ticket(ticket_code):
 
         if cursor.rowcount == 0:
 
-            raise HTTPException(
-
-                status_code=404,
-
-                detail="Senha não encontrada ou não pode ser cancelada."
-
-            )
+            ticket_cannot_be_cancelled()
 
         connection.commit()
 
