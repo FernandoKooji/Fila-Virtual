@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Painel do Atendente</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/attendant.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+
+        <h1>Painel do Atendente</h1>
+
+    </header>
+
+
+    <!-- Atendimento atual -->
+
+    <section class="current-card">
+
+        <h2>Atendimento Atual</h2>
+
+        <div id="currentTicket">
+
+            Nenhuma senha em atendimento
+
+        </div>
+
+    </section>
+
+
+    <!-- Próximas senhas -->
+
+    <section class="queue-card">
+
+        <h2>Fila de Espera</h2>
+
+        <ul id="queueList">
+
+        </ul>
+
+    </section>
+
+
+    <!-- Botões -->
+
+    <section class="actions">
+
+        <button id="btnNext">
+
+            Chamar Próxima
+
+        </button>
+
+        <button id="btnRecall">
+
+            Rechamar
+
+        </button>
+
+        <button id="btnFinish">
+
+            Finalizar
+
+        </button>
+
+        <button id="btnSkip">
+
+            Ausente
+
+        </button>
+
+    </section>
+
+</div>
+
+<script src="/static/js/attendant.js"></script>
+
+</body>
+
+</html>
