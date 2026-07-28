@@ -21,3 +21,14 @@ def index(request: Request):
         request=request,
         name="index.html"
     )
+
+@router.get(
+    "/attendant",
+    response_class=HTMLResponse
+)
+def attendant(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="attendant.html"
+    )
