@@ -87,11 +87,17 @@ export async function callNext() {
 // Rechamar senha
 // ======================================
 
-export async function recallTicket() {
+export async function recallTicket(id) {
 
     return post(
 
-        `${BASE_URL}/recall`
+        `${BASE_URL}/recall`,
+
+        {
+
+            id
+
+        }
 
     );
 

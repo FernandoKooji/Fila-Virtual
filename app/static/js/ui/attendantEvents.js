@@ -6,7 +6,8 @@ import {
     callNext,
     finishTicket,
     skipTicket,
-    recallTicket
+    recallTicket,
+    getCurrentTicket
 } from "../api/queueApi.js";
 
 import {
@@ -54,6 +55,42 @@ export function registerEvents() {
 }
 
 // ======================================
+// Funções auxiliares
+// ======================================
+
+async function getCurrentTicketId() {
+
+    const ticket = await getCurrentTicket();
+
+    if (!ticket?.id) {
+
+        throw new Error(
+            "Nenhuma senha em atendimento."
+        );
+
+    }
+
+    return ticket.id;
+
+}
+
+// ======================================
+// Atualizar interface
+// ======================================
+
+async function refreshScreen() {
+
+    await Promise.all([
+
+        loadCurrentTicket(),
+
+        loadQueue()
+
+    ]);
+
+}
+
+// ======================================
 // Chamar próxima senha
 // ======================================
 
@@ -83,11 +120,17 @@ async function onFinishTicket() {
 
     try {
 
-        await finishTicket();
+        const ticketId = await getCurrentTicketId();
+
+        await finishTicket(
+            ticketId
+        );
 
         await refreshScreen();
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
@@ -97,7 +140,7 @@ async function onFinishTicket() {
 
 }
 
-// ======================================
+/// ======================================
 // Marcar senha como ausente
 // ======================================
 
@@ -105,11 +148,17 @@ async function onSkipTicket() {
 
     try {
 
-        await skipTicket();
+        const ticketId = await getCurrentTicketId();
+
+        await skipTicket(
+            ticketId
+        );
 
         await refreshScreen();
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
@@ -127,39 +176,21 @@ async function onRecallTicket() {
 
     try {
 
-        await recallTicket();
+        const ticketId = await getCurrentTicketId();
 
-        /*
-            Futuramente:
+        await recallTicket(
+            ticketId
+        );
 
-            - tocar campainha
+    }
 
-            - enviar websocket
-
-            - falar a senha (TTS)
-
-            - atualizar TV
-        */
-
-    } catch (error) {
+    catch (error) {
 
         console.error(error);
 
         showError(error.message);
 
     }
-
-}
-
-// ======================================
-// Atualizar interface
-// ======================================
-
-async function refreshScreen() {
-
-    await loadCurrentTicket();
-
-    await loadQueue();
 
 }
 

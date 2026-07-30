@@ -2,21 +2,17 @@
 // Queue Mapper
 // ======================================
 
-
-// ======================================
-// Lista da fila
-// ======================================
-
 export function mapQueue(response) {
+
+    if (Array.isArray(response)) {
+
+        return response;
+
+    }
 
     return response.queue ?? [];
 
 }
-
-
-// ======================================
-// Status
-// ======================================
 
 export function mapQueueStatus(response) {
 
