@@ -4,6 +4,18 @@
 
 import {
 
+    createTicket,
+
+    getTicketPosition,
+
+    cancelTicket
+
+} from "./portalApi.js";
+
+import {
+
+    saveTicketSession,
+
     getTicketSession,
 
     hasTicketSession,
@@ -18,82 +30,139 @@ import {
 
 import {
 
-    getTicketPosition,
-
-    cancelTicket
-
-} from "./portalApi.js";
-
-import {
-
     updatePortalState
 
 } from "./portalState.js";
 
 import {
 
-    showErrorNotification
+    showHomeView
+
+} from "./portalView.js";
+
+import {
+
+    showSuccessNotification,
+
+    showErrorNotification,
+
+    showInfoNotification,
+
+    showConfirmNotification
 
 } from "./portalNotifications.js";
 
 
 // ======================================
-// Registrar eventos
+// Elementos
+// ======================================
+
+import {
+
+    btnEnter,
+
+    btnCancel,
+
+    btnConfirm,
+
+    btnCloseModal,
+
+    ticketModal
+
+} from "./portalElements.js";
+
+
+// ======================================
+// Inicialização
 // ======================================
 
 export function registerPortalEvents(){
 
-    registerCancelButton();
+    registerButtons();
 
-    restorePortalSession();
+    restoreSession();
 
 }
 
-// ======================================
-// Botão cancelar senha
-// ======================================
+function registerButtons(){
 
-function registerCancelButton(){
-
-    const button = document.getElementById("cancelTicketButton");
-
-    if(!button){
-
-        return;
-
-    }
-
-    button.addEventListener(
+    btnEnter?.addEventListener(
 
         "click",
 
-        handleCancelTicket
+        openModal
+
+    );
+
+    btnConfirm?.addEventListener(
+
+        "click",
+
+        confirmTicket
+
+    );
+
+    btnCloseModal?.addEventListener(
+
+        "click",
+
+        closeModal
+
+    );
+
+    btnCancel?.addEventListener(
+
+        "click",
+
+        handleCancel
 
     );
 
 }
 
-async function handleCancelTicket(){
+function openModal(){
 
-    const ticket = getTicketSession();
+    ticketModal.style.display = "flex";
 
-    if(!ticket){
+}
 
-        return;
+function closeModal(){
 
-    }
+    ticketModal.style.display = "none";
+
+}
+
+async function confirmTicket(){
+
+    const type = document.querySelector(
+
+        'input[name="ticket-type"]:checked'
+
+    ).value;
 
     try{
 
-        await cancelTicket(
+        const ticket = await createTicket(type);
 
-            ticket.ticketCode
+        saveTicketSession({
+
+            ticketCode: ticket.ticket_code,
+
+            ticketType: ticket.ticket_type
+
+        });
+
+        closeModal();
+
+        await refreshTicket();
+
+        startPolling();
+
+        showSuccessNotification(
+
+            "Senha criada com sucesso."
 
         );
-
-        clearTicketSession();
-
-        location.reload();
 
     }
 
@@ -109,49 +178,33 @@ async function handleCancelTicket(){
 
 }
 
-// ======================================
-// Restaurar sessão
-// ======================================
+async function restoreSession(){
 
-async function restorePortalSession(){
+    if(!hasTicketSession()){
 
-    if(
-
-        !hasTicketSession()
-
-    ){
+        showHomeView();
 
         return;
 
     }
 
-    const ticket = getTicketSession();
+    await refreshTicket();
 
-    await updateTicketStatus(
-
-        ticket.ticketCode
-
-    );
-
-    startPolling(
-
-        ticket.ticketCode
-
-    );
+    startPolling();
 
 }
 
-async function updateTicketStatus(ticketCode){
+async function refreshTicket(){
 
     try{
 
-        const response =
+        const ticket = getTicketSession();
 
-            await getTicketPosition(
+        const response = await getTicketPosition(
 
-                ticketCode
+            ticket.ticketCode
 
-            );
+        );
 
         updatePortalState(
 
@@ -163,6 +216,60 @@ async function updateTicketStatus(ticketCode){
 
     catch(error){
 
+    console.error(error);
+
+    }
+
+}
+
+function startPolling(){
+
+    startAutoRefresh(
+
+        refreshTicket,
+
+        5000
+
+    );
+
+}
+
+async function handleCancel(){
+
+    const confirmed = await showConfirmNotification(
+
+        "Cancelar senha?"
+
+    );
+
+    if(!confirmed){
+
+        return;
+
+    }
+
+    try{
+
+        const ticket = getTicketSession();
+
+        await cancelTicket(
+
+            ticket.ticketCode
+
+        );
+
+        clearPortal();
+
+        showInfoNotification(
+
+            "Senha cancelada."
+
+        );
+
+    }
+
+    catch(error){
+
         showErrorNotification(
 
             error.message
@@ -173,28 +280,13 @@ async function updateTicketStatus(ticketCode){
 
 }
 
-function startPolling(ticketCode){
-
-    startAutoRefresh(
-
-        async ()=>{
-
-            await updateTicketStatus(
-
-                ticketCode
-
-            );
-
-        },
-
-        5000
-
-    );
-
-}
-
-export function stopPortalPolling(){
+function clearPortal(){
 
     stopAutoRefresh();
 
+    clearTicketSession();
+
+    showHomeView();
+
 }
+

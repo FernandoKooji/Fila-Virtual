@@ -293,6 +293,9 @@ def get_ticket_position(ticket_code):
             )
 
         # Todos os demais estados
+
+        ticket = dict(ticket)
+
         return build_position_response(ticket)
 
     finally:

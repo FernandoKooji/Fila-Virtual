@@ -17,7 +17,9 @@ def build_ticket_response(ticket):
         "id": ticket["id"],
         "ticket_code": ticket["ticket_code"],
         "ticket_type": ticket["ticket_type"],
-        "status": ticket["status"]
+        "status": ticket["status"],
+        "called_at": ticket.get("called_at"),
+        "finished_at": ticket.get("finished_at")
     }
 
 
@@ -44,32 +46,31 @@ def build_current_ticket_response(ticket):
 
 def build_position_response(ticket, position=None):
 
-    response = {
+    ticket = dict(ticket)
 
-        "success": True,
+    return build_success_response({
 
         "ticket_code": ticket["ticket_code"],
 
+        "ticket_type": ticket["ticket_type"],
+
         "status": ticket["status"],
 
-        "position": None,
+        "position": (
+            position["position"]
+            if position else None
+        ),
 
-        "people_ahead": None
+        "people_ahead": (
+            position["people_ahead"]
+            if position else None
+        ),
 
-    }
+        "called_at": ticket.get("called_at"),
 
-    if (
+        "finished_at": ticket.get("finished_at")
 
-        ticket["status"] == STATUS_WAITING
-        and position is not None
-
-    ):
-
-        response["position"] = position["position"]
-
-        response["people_ahead"] = position["people_ahead"]
-
-    return response
+    })
 
 
 # ==========================================

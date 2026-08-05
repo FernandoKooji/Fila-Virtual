@@ -23,23 +23,44 @@
     <!-- Tela Inicial -->
     <!-- ========================= -->
 
-    <section id="home-screen">
+    <section id="homeSection">
 
         <h1>Fila Virtual</h1>
 
         <p>
+
             Senha atual:
-            <span id="current-ticket">--</span>
+
+            <span id="current-ticket">
+
+                --
+
+            </span>
+
         </p>
 
         <p>
+
             Pessoas aguardando:
-            <span id="waiting-total">--</span>
+
+            <span id="waiting-total">
+
+                --
+
+            </span>
+
         </p>
 
         <p>
+
             Tempo médio:
-            <span id="average-time">--</span>
+
+            <span id="average-time">
+
+                --
+
+            </span>
+
         </p>
 
         <button id="btn-enter">
@@ -52,42 +73,15 @@
 
 
     <!-- ========================= -->
-    <!-- Tela acompanhamento -->
+    <!-- Tela da senha -->
     <!-- ========================= -->
 
     <section
-        id="ticket-screen"
-        style="display:none;"
+        id="ticketSection"
+        hidden
     >
 
-        <h2>Sua senha</h2>
-
-        <h1 id="ticket-code">
-
-            N000
-
-        </h1>
-
-        <p>
-
-            Status:
-            <span id="ticket-status"></span>
-
-        </p>
-
-        <p>
-
-            Posição:
-            <span id="ticket-position"></span>
-
-        </p>
-
-        <p>
-
-            Pessoas na frente:
-            <span id="people-ahead"></span>
-
-        </p>
+        <div id="ticketCard"></div>
 
         <button id="btn-cancel">
 
@@ -98,6 +92,7 @@
     </section>
 
 </div>
+
 
 <!-- ========================= -->
 <!-- Modal -->
@@ -162,7 +157,11 @@
 
 </div>
 
-<script src="/static/js/client.js"></script>
+
+<script
+    type="module"
+    src="/static/js/portal/portal.js">
+</script>
 
 </body>
 

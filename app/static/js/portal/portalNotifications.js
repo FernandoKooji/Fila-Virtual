@@ -7,19 +7,13 @@
     passam por este arquivo.
 */
 
-function showNotification(title, message, callback = null){
+function showNotification(title, message){
 
     alert(
 
         `${title}\n\n${message}`
 
     );
-
-    if(callback){
-
-        callback();
-
-    }
 
 }
 
@@ -91,3 +85,26 @@ export function showErrorNotification(message){
 
 }
 
+export function showInfoNotification(message){
+
+    alert(message);
+
+}
+
+export function showSuccessNotification(message){
+
+    showNotification(
+
+        "Sucesso",
+
+        message
+
+    );
+
+}
+
+export function showConfirmNotification(message){
+
+    return confirm(message);
+
+}

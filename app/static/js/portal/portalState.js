@@ -4,6 +4,22 @@
 
 import {
 
+    showWaitingView,
+
+    showCalledView,
+
+    showAbsentView,
+
+    showFinishedView,
+
+    showCancelledView,
+
+    showHomeView
+
+} from "./portalView.js";
+
+import {
+
     clearTicketSession,
 
     stopAutoRefresh
@@ -12,143 +28,119 @@ import {
 
 import {
 
-    showCalledNotification,
-
-    showAbsentNotification,
-
-    showFinishedNotification,
-
-    showCancelledNotification
+    showInfoNotification
 
 } from "./portalNotifications.js";
 
-import {
-
-    showWaitingView,
-
-    showCalledView,
-
-    showHomeView
-
-} from "./portalView.js";
 
 // ======================================
-// Atualiza estado do portal
+// Atualiza estado do Portal
 // ======================================
 
 export function updatePortalState(ticket){
+
+    if(!ticket){
+
+        resetPortal();
+
+        return;
+
+    }
 
     switch(ticket.status){
 
         case "aguardando":
 
-            handleWaiting(ticket);
+            showWaitingView(ticket);
 
-            break;
+            return;
 
         case "em_atendimento":
 
-            handleCalled(ticket);
+            showCalledView(ticket);
 
-            break;
+            showInfoNotification(
+
+                "Sua senha foi chamada."
+
+            );
+
+            return;
 
         case "ausente":
 
-            handleAbsent(ticket);
+            showAbsentView(ticket);
 
-            break;
+            finishPortal(
+
+                "Sua senha foi marcada como ausente."
+
+            );
+
+            return;
 
         case "cancelado":
 
-            handleCancelled(ticket);
+            showCancelledView(ticket);
 
-            break;
+            finishPortal(
+
+                "Sua senha foi cancelada."
+
+            );
+
+            return;
 
         case "finalizado":
 
-            handleFinished(ticket);
+            showFinishedView(ticket);
 
-            break;
+            finishPortal(
+
+                "Seu atendimento foi finalizado."
+
+            );
+
+            return;
 
         default:
 
-            handleUnknown();
+            resetPortal();
 
     }
 
 }
 
-function handleCalled(ticket){
+// ======================================
+// Finaliza sessão
+// ======================================
 
+function finishPortal(message){
+
+    // Para de consultar a API
     stopAutoRefresh();
 
-    showCalledView(ticket);
+    // Exibe a notificação mantendo a tela atual
+    showInfoNotification(message);
 
-    showCalledNotification();
+    // Aguarda alguns segundos para o usuário ler
+    setTimeout(() => {
 
-}
+        // Limpa a sessão
+        clearTicketSession();
 
-function handleAbsent(){
-
-    stopAutoRefresh();
-
-    clearTicketSession();
-
-    showAbsentView(ticket);
-
-    showAbsentNotification(
-
-        () => {
-
-            showHomeView();
-
-        }
-
-    );
-
-}
-
-function handleCancelled(ticket){
-
-    stopAutoRefresh();
-
-    clearTicketSession();
-
-    showCancelledView(ticket);
-
-    showCancelledNotification(
-
-    () => {
-
+        // Volta para a tela inicial
         showHomeView();
 
-    }
-
-);
+    }, 5000);
 
 }
 
-function handleFinished(){
+// ======================================
+// Retorna tela inicial
+// ======================================
 
-    stopAutoRefresh();
-
-    clearTicketSession();
-
-    showFinishedView(ticket);
-
-    showFinishedNotification(
-
-        () => {
-
-            showHomeView();
-
-        }
-
-    );
-
-}
-
-function handleUnknown(){
+function resetPortal(){
 
     stopAutoRefresh();
 
@@ -157,3 +149,4 @@ function handleUnknown(){
     showHomeView();
 
 }
+

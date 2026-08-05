@@ -162,14 +162,10 @@ export function clearQueue() {
 // Atualizar toda a interface
 // ======================================
 
-export async function refreshView() {
+export async function refreshView(){
 
-    await Promise.all([
+    await loadCurrentTicket();
 
-        loadCurrentTicket(),
-
-        loadQueue()
-
-    ]);
+    await loadQueue();
 
 }

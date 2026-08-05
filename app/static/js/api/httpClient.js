@@ -14,55 +14,95 @@
 // Configuração
 // ======================================
 
-const DEFAULT_HEADERS = {
+const BASE_URL = "";
 
-    "Content-Type": "application/json"
-
-};
 
 // ======================================
-// Requisição genérica
+// GET
 // ======================================
 
-async function request(
-    url,
-    options = {}
-) {
+export async function get(url){
 
     const response = await fetch(
-        url,
-        {
 
-            headers: DEFAULT_HEADERS,
+        BASE_URL + url
 
-            ...options
-
-        }
     );
 
-    let data = null;
+    return await parseResponse(response);
 
-    try {
+}
 
-        data = await response.json();
 
-    }
+// ======================================
+// POST
+// ======================================
 
-    catch {
+export async function post(url, body){
 
-        data = null;
+    const response = await fetch(
 
-    }
+        BASE_URL + url,
 
-    if (!response.ok) {
+        {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type":"application/json"
+
+            },
+
+            body: JSON.stringify(body)
+
+        }
+
+    );
+
+    return await parseResponse(response);
+
+}
+
+
+// ======================================
+// DELETE
+// ======================================
+
+export async function del(url){
+
+    const response = await fetch(
+
+        BASE_URL + url,
+
+        {
+
+            method:"DELETE"
+
+        }
+
+    );
+
+    return await parseResponse(response);
+
+}
+
+
+// ======================================
+// Tratamento
+// ======================================
+
+async function parseResponse(response){
+
+    const data = await response.json();
+
+    if(!response.ok){
 
         throw new Error(
 
-            data?.detail ||
+            data.detail ||
 
-            data?.message ||
-
-            "Erro na comunicação com o servidor."
+            "Erro inesperado."
 
         );
 
@@ -71,82 +111,3 @@ async function request(
     return data;
 
 }
-
-// ======================================
-// GET
-// ======================================
-
-export async function get(url) {
-
-    return request(
-        url,
-        {
-
-            method: "GET"
-
-        }
-    );
-
-}
-
-// ======================================
-// POST
-// ======================================
-
-export async function post(
-    url,
-    body = {}
-) {
-
-    return request(
-        url,
-        {
-
-            method: "POST",
-
-            body: JSON.stringify(body)
-
-        }
-    );
-
-}
-
-// ======================================
-// PUT
-// ======================================
-
-export async function put(
-    url,
-    body = {}
-) {
-
-    return request(
-        url,
-        {
-
-            method: "PUT",
-
-            body: JSON.stringify(body)
-
-        }
-    );
-
-}
-
-// ======================================
-// DELETE
-// ======================================
-
-export async function del(url) {
-
-    return request(
-        url,
-        {
-
-            method: "DELETE"
-
-        }
-    );
-
-}
-

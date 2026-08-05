@@ -6,45 +6,26 @@ import {
 
     get,
 
-    post
+    post,
+
+    del
 
 } from "../api/httpClient.js";
 
-// ======================================
-// Endpoints
-// ======================================
-
-const QUEUE_URL = "/queue";
-
-const TICKET_URL = "/tickets";
 
 // ======================================
-// Consulta posição
+// Criar senha
 // ======================================
 
-export async function getTicketPosition(ticketCode){
-
-    return await get(
-
-        `${QUEUE_URL}/position/${ticketCode}`
-
-    );
-
-}
-
-// ======================================
-// Cancelar senha
-// ======================================
-
-export async function cancelTicket(ticketCode){
+export async function createTicket(ticketType){
 
     return await post(
 
-        `${TICKET_URL}/cancel`,
+        "/tickets/",
 
         {
 
-            ticket_code: ticketCode
+            ticket_type: ticketType
 
         }
 
@@ -52,19 +33,51 @@ export async function cancelTicket(ticketCode){
 
 }
 
+
 // ======================================
-// Consulta status da fila
+// Consultar posição
+// ======================================
+
+export async function getTicketPosition(ticketCode){
+
+    return await get(
+
+        `/queue/position/${ticketCode}`
+
+    );
+
+}
+
+
+// ======================================
+// Cancelar senha
+// ======================================
+
+export async function cancelTicket(ticketCode){
+
+    return await del(
+
+        `/tickets/${ticketCode}`
+
+    );
+
+}
+
+
+// ======================================
+// Status da fila
 // ======================================
 
 export async function getQueueStatus(){
 
     return await get(
 
-        `${QUEUE_URL}/status`
+        "/queue/status"
 
     );
 
 }
+
 
 // ======================================
 // Atendimento atual
@@ -74,9 +87,8 @@ export async function getCurrentTicket(){
 
     return await get(
 
-        `${QUEUE_URL}/current`
+        "/queue/current"
 
     );
 
 }
-

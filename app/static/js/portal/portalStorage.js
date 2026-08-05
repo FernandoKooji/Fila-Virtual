@@ -3,110 +3,108 @@
 // ======================================
 
 /*
-    Gerencia a sessão do cliente
-    armazenada no navegador.
+    Responsável por:
+
+    - LocalStorage
+    - Sessão da senha
+    - Atualização automática
 */
 
 // ======================================
-// Chaves do LocalStorage
+// Chaves
 // ======================================
 
 const STORAGE_KEY = "ticketSession";
 
-// ======================================
-// Variáveis privadas
-// ======================================
-
-let autoRefreshId = null;
 
 // ======================================
-// Salvar sessão
+// Polling
 // ======================================
 
-export function saveTicketSession(ticket) {
+let refreshInterval = null;
+
+
+// ======================================
+// Sessão
+// ======================================
+
+export function saveTicketSession(ticket){
 
     localStorage.setItem(
+
         STORAGE_KEY,
+
         JSON.stringify(ticket)
+
     );
 
 }
 
-// ======================================
-// Recuperar sessão
-// ======================================
 
-export function getTicketSession() {
+export function getTicketSession(){
 
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(
 
-    if (!data) {
+        STORAGE_KEY
+
+    );
+
+    if(!data){
+
         return null;
+
     }
 
     return JSON.parse(data);
 
 }
 
-// ======================================
-// Existe sessão?
-// ======================================
 
-export function hasTicketSession() {
+export function hasTicketSession(){
 
     return getTicketSession() !== null;
 
 }
 
-// ======================================
-// Limpar sessão
-// ======================================
 
-export function clearTicketSession() {
+export function clearTicketSession(){
 
-    stopAutoRefresh();
+    localStorage.removeItem(
 
-    localStorage.removeItem(STORAGE_KEY);
+        STORAGE_KEY
 
-}
-
-// ======================================
-// Iniciar atualização automática
-// ======================================
-
-export function startAutoRefresh(callback, interval = 5000) {
-
-    stopAutoRefresh();
-
-    autoRefreshId = setInterval(
-        callback,
-        interval
     );
 
 }
 
+
 // ======================================
-// Parar atualização automática
+// Atualização automática
 // ======================================
 
-export function stopAutoRefresh() {
+export function startAutoRefresh(callback, interval = 5000){
 
-    if (autoRefreshId !== null) {
+    stopAutoRefresh();
 
-        clearInterval(autoRefreshId);
+    refreshInterval = setInterval(
 
-        autoRefreshId = null;
+        callback,
 
-    }
+        interval
+
+    );
 
 }
 
-// ======================================
-// Verifica se o polling está ativo
-// ======================================
 
-export function isAutoRefreshRunning() {
+export function stopAutoRefresh(){
 
-    return autoRefreshId !== null;
+    if(refreshInterval){
+
+        clearInterval(refreshInterval);
+
+        refreshInterval = null;
+
+    }
 
 }

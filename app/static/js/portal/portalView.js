@@ -11,14 +11,16 @@
 // Elementos
 // ======================================
 
-const ticketCard =
-    document.getElementById("ticketCard");
+import {
 
-const homeSection =
-    document.getElementById("homeSection");
+    homeSection,
 
-const ticketSection =
-    document.getElementById("ticketSection");
+    ticketSection,
+
+    ticketCard
+
+} from "./portalElements.js";
+
 
 // ======================================
 // Tela inicial
@@ -32,19 +34,33 @@ export function showHomeView(){
 
 }
 
+
 // ======================================
 // Tela aguardando
 // ======================================
 
 export function showWaitingView(ticket){
 
-    homeSection.hidden = true;
+    showTicketSection();
 
-    ticketSection.hidden = false;
+    renderTicketCard({
 
-    ticketCard.innerHTML = waitingTemplate(ticket);
+        ticketCode: ticket.ticket_code,
+
+        title: "Aguardando atendimento",
+
+        message: "Aguarde sua chamada.",
+
+        statusClass: "waiting",
+
+        position: ticket.position,
+
+        peopleAhead: ticket.people_ahead
+
+    });
 
 }
+
 
 // ======================================
 // Tela senha chamada
@@ -52,13 +68,22 @@ export function showWaitingView(ticket){
 
 export function showCalledView(ticket){
 
-    homeSection.hidden = true;
+    showTicketSection();
 
-    ticketSection.hidden = false;
+    renderTicketCard({
 
-    ticketCard.innerHTML = calledTemplate(ticket);
+        ticketCode: ticket.ticket_code,
+
+        title: "Sua senha foi chamada",
+
+        message: "Dirija-se ao atendimento.",
+
+        statusClass: "success"
+
+    });
 
 }
+
 
 // ======================================
 // Tela ausente
@@ -66,13 +91,22 @@ export function showCalledView(ticket){
 
 export function showAbsentView(ticket){
 
-    homeSection.hidden = true;
+    showTicketSection();
 
-    ticketSection.hidden = false;
+    renderTicketCard({
 
-    ticketCard.innerHTML = absentTemplate(ticket);
+        ticketCode: ticket.ticket_code,
+
+        title: "Senha marcada como ausente",
+
+        message: "Procure um atendente.",
+
+        statusClass: "danger"
+
+    });
 
 }
+
 
 // ======================================
 // Tela atendimento finalizado
@@ -80,13 +114,22 @@ export function showAbsentView(ticket){
 
 export function showFinishedView(ticket){
 
-    homeSection.hidden = true;
+    showTicketSection();
 
-    ticketSection.hidden = false;
+    renderTicketCard({
 
-    ticketCard.innerHTML = finishedTemplate(ticket);
+        ticketCode: ticket.ticket_code,
+
+        title: "Atendimento finalizado",
+
+        message: "Obrigado pela preferência. Você pode fechar o portal",
+
+        statusClass: "info"
+
+    });
 
 }
+
 
 // ======================================
 // Tela cancelada
@@ -94,41 +137,65 @@ export function showFinishedView(ticket){
 
 export function showCancelledView(ticket){
 
+    showTicketSection();
+
+    renderTicketCard({
+
+        ticketCode: ticket.ticket_code,
+
+        title: "Senha cancelada",
+
+        message: "Você saiu da fila.",
+
+        statusClass: "warning"
+
+    });
+
+}
+
+
+// ======================================
+// Exibe tela da senha
+// ======================================
+
+function showTicketSection(){
+
     homeSection.hidden = true;
 
     ticketSection.hidden = false;
 
-    ticketCard.innerHTML = cancelledTemplate(ticket);
-
 }
+
 
 // ======================================
-// Templates
+// Renderização única
 // ======================================
 
-function waitingTemplate(ticket){
+function renderTicketCard(data){
 
-    return `
+    ticketCard.innerHTML = `
 
-        <div class="ticket-card">
+        <div class="ticket-card ${data.statusClass}">
 
-            <h1>${ticket.ticket_code}</h1>
+            <h1>
 
-            <h2>Aguardando atendimento</h2>
+                ${data.ticketCode}
+
+            </h1>
+
+            <h2>
+
+                ${data.title}
+
+            </h2>
 
             <p>
 
-                Posição:
-                <strong>${ticket.position}</strong>
+                ${data.message}
 
             </p>
 
-            <p>
-
-                Pessoas à frente:
-                <strong>${ticket.people_ahead}</strong>
-
-            </p>
+            ${renderQueueInfo(data)}
 
         </div>
 
@@ -136,89 +203,38 @@ function waitingTemplate(ticket){
 
 }
 
-function calledTemplate(ticket){
+
+// ======================================
+// Informações da fila
+// ======================================
+
+function renderQueueInfo(data){
+
+    if(data.position === undefined){
+
+        return "";
+
+    }
 
     return `
 
-        <div class="ticket-card success">
+        <hr>
 
-            <h1>${ticket.ticket_code}</h1>
+        <p>
 
-            <h2>Sua senha foi chamada</h2>
+            <strong>Posição:</strong>
 
-            <p>
+            ${data.position}
 
-                Dirija-se ao atendimento.
+        </p>
 
-            </p>
+        <p>
 
-        </div>
+            <strong>Pessoas à frente:</strong>
 
-    `;
+            ${data.peopleAhead}
 
-}
-
-function absentTemplate(ticket){
-
-    return `
-
-        <div class="ticket-card danger">
-
-            <h1>${ticket.ticket_code}</h1>
-
-            <h2>Senha marcada como ausente</h2>
-
-            <p>
-
-                Procure um atendente.
-
-            </p>
-
-        </div>
-
-    `;
-
-}
-
-function finishedTemplate(ticket){
-
-    return `
-
-        <div class="ticket-card info">
-
-            <h1>${ticket.ticket_code}</h1>
-
-            <h2>Atendimento finalizado</h2>
-
-            <p>
-
-                Obrigado pela preferência.
-
-            </p>
-
-        </div>
-
-    `;
-
-}
-
-function cancelledTemplate(ticket){
-
-    return `
-
-        <div class="ticket-card warning">
-
-            <h1>${ticket.ticket_code}</h1>
-
-            <h2>Senha cancelada</h2>
-
-            <p>
-
-                Você saiu da fila.
-
-            </p>
-
-        </div>
+        </p>
 
     `;
 

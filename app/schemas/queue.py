@@ -36,8 +36,13 @@ class QueueStatusResponse(BaseModel):
 # ============================
 
 class QueuePositionResponse(BaseModel):
+
     success: bool
+
     ticket_code: str
+
     status: str
-    position: int
-    people_ahead: int
+
+    position: Optional[int] = None
+
+    people_ahead: Optional[int] = None
