@@ -1,5 +1,15 @@
+# ============================
+# Imports
+# ============================
+
 import sqlite3
+
 from pathlib import Path
+
+
+# ============================
+# Caminhos
+# ============================
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -7,12 +17,23 @@ DB_PATH = BASE_DIR / "database.db"
 
 SCHEMA_PATH = BASE_DIR / "schema.sql"
 
+
+# ============================
+# Conexão
+# ============================
+
 def get_connection():
+
     connection = sqlite3.connect(DB_PATH)
 
     connection.row_factory = sqlite3.Row
 
     return connection
+
+
+# ============================
+# Inicialização
+# ============================
 
 def initialize_database():
 
@@ -20,11 +41,20 @@ def initialize_database():
 
     cursor = connection.cursor()
 
-    with open(SCHEMA_PATH, "r", encoding="utf-8") as file:
+    with open(
+
+        SCHEMA_PATH,
+
+        "r",
+
+        encoding="utf-8"
+
+    ) as file:
 
         schema_sql = file.read()
 
     cursor.executescript(schema_sql)
 
     connection.commit()
+
     connection.close()

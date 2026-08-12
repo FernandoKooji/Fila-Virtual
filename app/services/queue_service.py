@@ -2,16 +2,15 @@
 # Imports
 # ============================
 
-from fastapi import HTTPException
 
 from app.database.database import get_connection
 
 from app.core.constants import (
+
     STATUS_IN_SERVICE,
-    STATUS_FINISHED,
-    STATUS_WAITING,
-    STATUS_ABSENT,
-    STATUS_CANCELLED
+
+    STATUS_WAITING
+
 )
 
 from app.database.queries import (
@@ -48,20 +47,49 @@ from app.core.exceptions import (
 )
 
 # ============================
+# Helpers
+# ============================
+
+def _get_cursor():
+
+    connection = get_connection()
+
+    return connection, connection.cursor()
+
+def _get_ordered_queue(cursor):
+
+    cursor.execute(
+
+        GET_WAITING_TICKETS
+
+    )
+
+    waiting = cursor.fetchall()
+
+    return sort_queue(waiting)
+
+def _get_current_ticket(cursor):
+
+    cursor.execute(
+
+        GET_CURRENT_TICKET
+
+    )
+
+    return cursor.fetchone()
+
+# ============================
 # Atendimento atual
 # ============================
 
 def get_current_ticket():
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
-        cursor.execute(GET_CURRENT_TICKET)
-
-        ticket = cursor.fetchone()
-
+        ticket = _get_current_ticket(cursor)
+        
         if ticket is None:
             no_current_ticket()
 
@@ -86,24 +114,15 @@ Quantas pessoas há na fila ao todo?
 
 def get_queue_status():
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
-        # Busca todas as senhas aguardando
-        cursor.execute(GET_WAITING_TICKETS)
-
-        waiting = cursor.fetchall()
-
-        ordered_queue = sort_queue(waiting)
+        ordered_queue = _get_ordered_queue(cursor)
 
         stats = queue_statistics(ordered_queue)
 
-        # Busca atendimento atual
-        cursor.execute(GET_CURRENT_TICKET)
-
-        current = cursor.fetchone()
+        ticket = _get_current_ticket(cursor)
 
         return build_success_response({
 
@@ -127,16 +146,11 @@ def get_queue_status():
 
 def call_next():
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
-        cursor.execute(GET_WAITING_TICKETS)
-
-        waiting_tickets = cursor.fetchall()
-
-        ordered_queue = sort_queue(waiting_tickets)
+        ordered_queue = _get_ordered_queue(cursor)
 
         ticket = next_ticket(ordered_queue)
 
@@ -168,8 +182,7 @@ def call_next():
 
 def finish_ticket(ticket_id):
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
@@ -197,8 +210,7 @@ def finish_ticket(ticket_id):
 
 def skip_ticket(ticket_id):
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
@@ -225,8 +237,7 @@ def skip_ticket(ticket_id):
 
 def cancel_ticket(ticket_id):
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
@@ -254,8 +265,7 @@ def cancel_ticket(ticket_id):
 
 def get_ticket_position(ticket_code):
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
@@ -274,11 +284,7 @@ def get_ticket_position(ticket_code):
         # Apenas aguardando possui posição
         if ticket["status"] == STATUS_WAITING:
 
-            cursor.execute(GET_WAITING_TICKETS)
-
-            waiting = cursor.fetchall()
-
-            ordered_queue = sort_queue(waiting)
+            ordered_queue = _get_ordered_queue(cursor)
 
             position = ticket_position(
                 ordered_queue,
@@ -308,24 +314,15 @@ def get_ticket_position(ticket_code):
 
 def get_queue_list():
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
-        # Busca todas as senhas aguardando
-        cursor.execute(GET_WAITING_TICKETS)
+        ordered = _get_ordered_queue(cursor)
 
-        waiting = cursor.fetchall()
+        queue = [
 
-        # Ordena utilizando a regra da fila
-        ordered = sort_queue(waiting)
-
-        queue = []
-
-        for index, ticket in enumerate(ordered, start=1):
-
-            queue.append({
+            {
 
                 "position": index,
 
@@ -335,7 +332,17 @@ def get_queue_list():
 
                 "ticket_type": ticket["ticket_type"]
 
-            })
+            }
+
+            for index, ticket in enumerate(
+
+                ordered,
+
+                start=1
+
+            )
+
+        ]
 
         return build_success_response({
 
@@ -353,20 +360,15 @@ def get_queue_list():
 
 def recall_ticket():
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection, cursor = _get_cursor()
 
     try:
 
-        cursor.execute(GET_CURRENT_TICKET)
-
-        ticket = cursor.fetchone()
+        ticket = _get_current_ticket(cursor)
 
         if ticket is None:
 
-            not_found(
-                "Nenhuma senha em atendimento."
-            )
+            no_current_ticket()
 
         return build_current_ticket_response(
             ticket

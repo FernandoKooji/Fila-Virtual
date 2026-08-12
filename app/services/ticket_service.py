@@ -2,8 +2,6 @@
 # Imports
 # ============================
 
-from fastapi import HTTPException
-
 from app.database.database import get_connection
 
 from app.core.constants import (
@@ -29,13 +27,40 @@ from app.core.response_mapper import (
 )
 
 from app.core.exceptions import (
-    queue_empty,
-    no_current_ticket,
-    ticket_not_found,
-    ticket_not_found_or_not_in_service,
-    ticket_cannot_be_cancelled,
-    invalid_ticket_type
+
+    invalid_ticket_type,
+
+    ticket_cannot_be_cancelled
+
 )
+
+TICKET_CONFIG = {
+
+    NORMAL: {
+
+        "get": GET_LAST_NORMAL,
+
+        "update": UPDATE_LAST_NORMAL,
+
+        "column": "last_normal_number",
+
+        "prefix": NORMAL_PREFIX
+
+    },
+
+    PRIORITY: {
+
+        "get": GET_LAST_PRIORITY,
+
+        "update": UPDATE_LAST_PRIORITY,
+
+        "column": "last_priority_number",
+
+        "prefix": PRIORITY_PREFIX
+
+    }
+
+}
 
 # ============================
 # Functions
@@ -43,8 +68,9 @@ from app.core.exceptions import (
 
 def create_ticket(ticket_type):
 
-    # Valida o tipo de senha antes de acessar o banco
-    if ticket_type not in ("N", "P"):
+    
+    if ticket_type not in (NORMAL, PRIORITY):
+
         invalid_ticket_type()
 
     connection = get_connection()
@@ -52,48 +78,35 @@ def create_ticket(ticket_type):
 
     try:
 
-        # Configuração conforme o tipo da senha
+        
         if ticket_type == NORMAL:
 
-            config = {
-                "get": GET_LAST_NORMAL,
-                "update": UPDATE_LAST_NORMAL,
-                "column": "last_normal_number",
-                "prefix": NORMAL_PREFIX
-            }
+            config = TICKET_CONFIG[NORMAL]
 
         else:
 
-            config = {
-                "get": GET_LAST_PRIORITY,
-                "update": UPDATE_LAST_PRIORITY,
-                "column": "last_priority_number",
-                "prefix": PRIORITY_PREFIX
-            }
+            config = TICKET_CONFIG[PRIORITY]
 
-        # Busca o último número utilizado
+        
         cursor.execute(config["get"])
 
         result = cursor.fetchone()
 
         last_number = result[config["column"]]
 
-        # Gera o próximo número
+        
         new_number = last_number + 1
 
-        # Atualiza o contador
+        
         cursor.execute(
             config["update"],
             (new_number,)
         )
 
-        # Monta o código da senha
-        ticket_code = (
-            config["prefix"] +
-            str(new_number).zfill(3)
-        )
+        
+        ticket_code = f'{config["prefix"]}{new_number:03d}'
 
-        # Salva o ticket
+        
         cursor.execute(
             INSERT_TICKET,
             (
@@ -102,7 +115,7 @@ def create_ticket(ticket_type):
             )
         )
 
-        # Obtém o ID criado
+        
         ticket_id = cursor.lastrowid
 
         connection.commit()
@@ -123,7 +136,6 @@ def create_ticket(ticket_type):
 def cancel_ticket(ticket_code):
 
     connection = get_connection()
-
     cursor = connection.cursor()
 
     try:

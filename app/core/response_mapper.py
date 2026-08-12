@@ -4,7 +4,7 @@
 # ==========================================
 
 from app.core.constants import STATUS_WAITING
-
+from app.core.date_formatter import format_datetime
 
 # ==========================================
 # Ticket
@@ -18,8 +18,13 @@ def build_ticket_response(ticket):
         "ticket_code": ticket["ticket_code"],
         "ticket_type": ticket["ticket_type"],
         "status": ticket["status"],
-        "called_at": ticket.get("called_at"),
-        "finished_at": ticket.get("finished_at")
+        "called_at": format_datetime(
+            ticket.get("called_at")
+        ),
+
+        "finished_at": format_datetime(
+            ticket.get("finished_at")
+        )
     }
 
 
@@ -35,7 +40,11 @@ def build_current_ticket_response(ticket):
         "ticket_code": ticket["ticket_code"],
         "ticket_type": ticket["ticket_type"],
         "status": ticket["status"],
-        "called_at": ticket["called_at"]
+        "called_at": format_datetime(
+
+            ticket["called_at"]
+
+        )
 
     })
 
@@ -66,9 +75,13 @@ def build_position_response(ticket, position=None):
             if position else None
         ),
 
-        "called_at": ticket.get("called_at"),
+        "called_at": format_datetime(
+            ticket.get("called_at")
+        ),
 
-        "finished_at": ticket.get("finished_at")
+        "finished_at": format_datetime(
+            ticket.get("finished_at")
+        )
 
     })
 

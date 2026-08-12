@@ -3,9 +3,6 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-# ============================
-# Atendimento Atual
-# ============================
 
 class CurrentTicketResponse(BaseModel):
     success: bool
@@ -15,10 +12,6 @@ class CurrentTicketResponse(BaseModel):
     status: Optional[str] = None
     called_at: Optional[str] = None
 
-
-# ============================
-# Resumo da fila
-# ============================
 
 class QueueStatusResponse(BaseModel):
     success: bool
@@ -31,9 +24,6 @@ class QueueStatusResponse(BaseModel):
 
     total_waiting: int
 
-# ============================
-# Posição da senha
-# ============================
 
 class QueuePositionResponse(BaseModel):
 
@@ -46,3 +36,21 @@ class QueuePositionResponse(BaseModel):
     position: Optional[int] = None
 
     people_ahead: Optional[int] = None
+
+
+class QueueItem(BaseModel):
+
+    position: int
+
+    id: int
+
+    ticket_code: str
+
+    ticket_type: str
+
+
+class QueueListResponse(BaseModel):
+
+    success: bool
+
+    queue: list[QueueItem]

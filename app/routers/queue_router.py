@@ -6,12 +6,14 @@ from fastapi import APIRouter
 
 from app.schemas.ticket import (
     FinishTicketRequest,
+    TicketResponse,
     MessageResponse
 )
 
 from app.schemas.queue import (
     CurrentTicketResponse,
     QueueStatusResponse,
+    QueueListResponse,
     QueuePositionResponse
 )
 
@@ -47,11 +49,40 @@ router = APIRouter(
 def current_ticket_route():
     return get_current_ticket()
 
+@router.get(
+    "/status",
+    response_model=QueueStatusResponse
+)
+def queue_status_route():
+    return get_queue_status()
 
-@router.post("/next")
+@router.get(
+    "/position/{ticket_code}",
+    response_model=QueuePositionResponse
+)
+def ticket_position_route(ticket_code: str):
+    return get_ticket_position(ticket_code)
+
+@router.get(
+    "/list",
+    response_model=QueueListResponse
+)
+def queue_list_route():
+    return get_queue_list()
+
+@router.post(
+    "/next",
+    response_model=TicketResponse
+)
 def call_next_route():
     return call_next()
 
+@router.post(
+    "/recall",
+    response_model=CurrentTicketResponse
+)
+def recall_ticket_route():
+    return recall_ticket()
 
 @router.post(
     "/finish",
@@ -74,26 +105,9 @@ def skip_ticket_route(ticket: FinishTicketRequest):
 def cancel_ticket_route(ticket: FinishTicketRequest):
     return cancel_ticket(ticket.id)
 
-@router.get(
-    "/position/{ticket_code}",
-    response_model=QueuePositionResponse
-)
-def ticket_position_route(ticket_code: str):
-    return get_ticket_position(ticket_code)
 
-@router.get(
-    "/status",
-    response_model=QueueStatusResponse
-)
-def queue_status_route():
-    return get_queue_status()
 
-@router.get("/list")
-def queue_list_route():
 
-    return get_queue_list()
 
-@router.post("/recall")
-def recall_ticket_route():
 
-    return recall_ticket()
+
