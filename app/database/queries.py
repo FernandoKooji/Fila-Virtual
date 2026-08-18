@@ -26,6 +26,7 @@ SET last_priority_number = ?
 WHERE id = 1;
 """
 
+
 # ============================
 # Tickets
 # ============================
@@ -53,7 +54,9 @@ SELECT
     status,
     created_at,
     called_at,
-    finished_at
+    finished_at,
+    wait_time_seconds,
+    service_time_seconds
 FROM tickets
 WHERE ticket_code = ?;
 """
@@ -83,29 +86,63 @@ ORDER BY called_at DESC
 LIMIT 1;
 """
 
+
 # ============================
-# Mudanca de status
+# Mudança de status
 # ============================
 
 CALL_TICKET = """
 UPDATE tickets
 SET
     status = 'em_atendimento',
-    called_at = datetime('now', 'localtime')
-WHERE id = ?;
+
+    called_at = datetime('now', 'localtime'),
+
+    wait_time_seconds =
+        CAST(
+            strftime(
+                '%s',
+                datetime('now', 'localtime')
+            ) AS INTEGER
+        )
+        -
+        CAST(
+            strftime(
+                '%s',
+                created_at
+            ) AS INTEGER
+        )
+
+WHERE
+    id = ?
+    AND status = 'aguardando';
 """
 
 FINISH_TICKET = """
 UPDATE tickets
 SET
     status = 'finalizado',
+
     finished_at = datetime('now', 'localtime'),
+
     service_time_seconds =
-        CAST(strftime('%s', datetime('now', 'localtime')) AS INTEGER)
+        CAST(
+            strftime(
+                '%s',
+                datetime('now', 'localtime')
+            ) AS INTEGER
+        )
         -
-        CAST(strftime('%s', called_at) AS INTEGER)
-WHERE id = ?
-AND status='em_atendimento';
+        CAST(
+            strftime(
+                '%s',
+                called_at
+            ) AS INTEGER
+        )
+
+WHERE
+    id = ?
+    AND status = 'em_atendimento';
 """
 
 SKIP_TICKET = """
@@ -113,8 +150,9 @@ UPDATE tickets
 SET
     status = 'ausente',
     finished_at = datetime('now', 'localtime')
-WHERE id = ?
-AND status = 'em_atendimento';
+WHERE
+    id = ?
+    AND status = 'em_atendimento';
 """
 
 CANCEL_TICKET = """
@@ -127,3 +165,66 @@ WHERE
     AND status = 'aguardando';
 """
 
+
+# ============================
+# Relatórios
+# ============================
+
+GET_REPORT_TOTALS = """
+SELECT
+    COUNT(*) AS total_tickets,
+
+    SUM(
+        CASE
+            WHEN status = 'finalizado'
+            THEN 1
+            ELSE 0
+        END
+    ) AS total_finished,
+
+    SUM(
+        CASE
+            WHEN status = 'ausente'
+            THEN 1
+            ELSE 0
+        END
+    ) AS total_absent,
+
+    SUM(
+        CASE
+            WHEN status = 'cancelado'
+            THEN 1
+            ELSE 0
+        END
+    ) AS total_cancelled,
+
+    SUM(
+        CASE
+            WHEN ticket_type = 'P'
+            THEN 1
+            ELSE 0
+        END
+    ) AS total_priority,
+
+    SUM(
+        CASE
+            WHEN ticket_type = 'N'
+            THEN 1
+            ELSE 0
+        END
+    ) AS total_normal
+
+FROM tickets;
+"""
+
+
+GET_REPORT_AVERAGES = """
+SELECT
+    AVG(wait_time_seconds) AS average_wait_time_seconds,
+
+    AVG(service_time_seconds) AS average_service_time_seconds
+
+FROM tickets
+WHERE
+    status = 'finalizado';
+"""
