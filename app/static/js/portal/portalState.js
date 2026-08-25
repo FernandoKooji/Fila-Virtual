@@ -28,10 +28,17 @@ import {
 
 import {
 
+    showSuccessNotification,
+
+    showErrorNotification,
+
+    showWarningNotification,
+
     showInfoNotification
 
 } from "./portalNotifications.js";
 
+let lastTicketStatus = null;
 
 // ======================================
 // Atualiza estado do Portal
@@ -59,22 +66,26 @@ export function updatePortalState(ticket){
 
             showCalledView(ticket);
 
-            showInfoNotification(
+            if (lastTicketStatus !== "em_atendimento") {
 
-                "Sua senha foi chamada."
+                showSuccessNotification(
+                    "Sua senha foi chamada. Dirija-se ao atendimento."
+                );
 
-            );
+            }
+
+            lastTicketStatus = "em_atendimento";
 
             return;
+
 
         case "ausente":
 
             showAbsentView(ticket);
 
             finishPortal(
-
-                "Sua senha foi marcada como ausente."
-
+                "Sua senha foi marcada como ausente. Procure um atendente.",
+                "error"
             );
 
             return;
@@ -96,9 +107,8 @@ export function updatePortalState(ticket){
             showFinishedView(ticket);
 
             finishPortal(
-
-                "Seu atendimento foi finalizado."
-
+                "Seu atendimento foi finalizado.",
+                "info"
             );
 
             return;
@@ -115,24 +125,40 @@ export function updatePortalState(ticket){
 // Finaliza sessão
 // ======================================
 
-function finishPortal(message){
+function finishPortal(
+    message,
+    type = "info"
+) {
 
-    // Para de consultar a API
     stopAutoRefresh();
 
-    // Exibe a notificação mantendo a tela atual
+    clearTicketSession();
+
+    if (type === "success") {
+
+        showSuccessNotification(message);
+
+        return;
+
+    }
+
+    if (type === "error") {
+
+        showErrorNotification(message);
+
+        return;
+
+    }
+
+    if (type === "warning") {
+
+        showWarningNotification(message);
+
+        return;
+
+    }
+
     showInfoNotification(message);
-
-    // Aguarda alguns segundos para o usuário ler
-    setTimeout(() => {
-
-        // Limpa a sessão
-        clearTicketSession();
-
-        // Volta para a tela inicial
-        showHomeView();
-
-    }, 5000);
 
 }
 
@@ -140,11 +166,13 @@ function finishPortal(message){
 // Retorna tela inicial
 // ======================================
 
-function resetPortal(){
+function resetPortal() {
 
     stopAutoRefresh();
 
     clearTicketSession();
+
+    lastTicketStatus = null;
 
     showHomeView();
 

@@ -2,109 +2,273 @@
 // Portal Notifications
 // ======================================
 
-/*
-    Todas as mensagens do Portal
-    passam por este arquivo.
-*/
+let notificationModal = null;
 
-function showNotification(title, message){
 
-    alert(
+// ======================================
+// Criar modal
+// ======================================
 
-        `${title}\n\n${message}`
+function createNotificationModal() {
 
+    if (notificationModal) {
+
+        return notificationModal;
+
+    }
+
+    notificationModal =
+        document.createElement("div");
+
+    notificationModal.id =
+        "portal-notification-modal";
+
+    notificationModal.className =
+        "portal-notification-modal";
+
+    notificationModal.innerHTML = `
+
+        <div class="portal-notification-content">
+
+            <div
+                id="portal-notification-message"
+                class="portal-notification-message"
+            ></div>
+
+            <div
+                id="portal-notification-actions"
+                class="portal-notification-actions"
+            ></div>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(
+        notificationModal
     );
+
+    return notificationModal;
 
 }
 
-export function showCalledNotification(callback){
+
+// ======================================
+// Mostrar notificação
+// ======================================
+
+function showNotification(
+    message,
+    type
+) {
+
+    const modal =
+        createNotificationModal();
+
+    const messageElement =
+        modal.querySelector(
+            "#portal-notification-message"
+        );
+
+    const actions =
+        modal.querySelector(
+            "#portal-notification-actions"
+        );
+
+    messageElement.textContent =
+        message;
+
+    modal.className =
+        `portal-notification-modal ${type}`;
+
+    actions.innerHTML = `
+
+        <button
+            type="button"
+            class="portal-notification-close"
+            id="portal-notification-ok"
+        >
+            OK
+        </button>
+
+    `;
+
+    const button =
+        actions.querySelector(
+            "#portal-notification-ok"
+        );
+
+    button.onclick = () => {
+
+        closeNotification();
+
+    };
+
+    modal.hidden = false;
+
+}
+
+
+// ======================================
+// Fechar notificação
+// ======================================
+
+function closeNotification() {
+
+    if (!notificationModal) {
+
+        return;
+
+    }
+
+    notificationModal.hidden = true;
+
+}
+
+
+// ======================================
+// Sucesso
+// ======================================
+
+export function showSuccessNotification(
+    message
+) {
 
     showNotification(
-
-        "Sua senha foi chamada",
-
-        "Dirija-se ao atendimento.",
-
-        callback
-
+        message,
+        "success"
     );
 
 }
 
-export function showAbsentNotification(callback){
+
+// ======================================
+// Erro
+// ======================================
+
+export function showErrorNotification(
+    message
+) {
 
     showNotification(
-
-        "Senha marcada como ausente",
-
-        "Procure um atendente para obter orientações.",
-
-        callback
-
+        message,
+        "error"
     );
 
 }
 
-export function showFinishedNotification(callback){
+
+// ======================================
+// Informação
+// ======================================
+
+export function showInfoNotification(
+    message
+) {
 
     showNotification(
-
-        "Atendimento finalizado",
-
-        "Obrigado por utilizar nosso atendimento.",
-
-        callback
-
+        message,
+        "info"
     );
 
 }
 
-export function showCancelledNotification(callback){
+
+// ======================================
+// Aviso
+// ======================================
+
+export function showWarningNotification(
+    message
+) {
 
     showNotification(
-
-        "Senha cancelada",
-
-        "Sua senha foi removida da fila.",
-
-        callback
-
+        message,
+        "warning"
     );
 
 }
 
-export function showErrorNotification(message){
 
-    showNotification(
+// ======================================
+// Confirmação
+// ======================================
 
-        "Erro",
+export function showConfirmNotification(
+    message
+) {
 
-        message
+    return new Promise(
+        resolve => {
 
+            const modal =
+                createNotificationModal();
+
+            const messageElement =
+                modal.querySelector(
+                    "#portal-notification-message"
+                );
+
+            const actions =
+                modal.querySelector(
+                    "#portal-notification-actions"
+                );
+
+            messageElement.textContent =
+                message;
+
+            modal.className =
+                "portal-notification-modal warning";
+
+            actions.innerHTML = `
+
+                <button
+                    type="button"
+                    id="portal-notification-cancel"
+                    class="portal-notification-cancel"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    id="portal-notification-confirm"
+                    class="portal-notification-close"
+                >
+                    Confirmar
+                </button>
+
+            `;
+
+            const cancelButton =
+                actions.querySelector(
+                    "#portal-notification-cancel"
+                );
+
+            const confirmButton =
+                actions.querySelector(
+                    "#portal-notification-confirm"
+                );
+
+            cancelButton.onclick = () => {
+
+                closeNotification();
+
+                resolve(false);
+
+            };
+
+            confirmButton.onclick = () => {
+
+                closeNotification();
+
+                resolve(true);
+
+            };
+
+            modal.hidden = false;
+
+        }
     );
-
-}
-
-export function showInfoNotification(message){
-
-    alert(message);
-
-}
-
-export function showSuccessNotification(message){
-
-    showNotification(
-
-        "Sucesso",
-
-        message
-
-    );
-
-}
-
-export function showConfirmNotification(message){
-
-    return confirm(message);
 
 }

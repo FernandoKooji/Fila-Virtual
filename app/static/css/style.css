@@ -32,3 +32,197 @@ button{
     border-radius:10px;
     width:360px;
 }
+
+/* ======================================
+   Portal Notifications
+   ====================================== */
+
+.portal-notification-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 9999;
+
+    pointer-events: auto;
+
+}
+
+/* ======================================
+   Ocultar modal
+   ====================================== */
+
+.portal-notification-modal[hidden] {
+
+    display: none !important;
+
+}
+
+
+/* ======================================
+   Conteúdo
+   ====================================== */
+
+.portal-notification-content {
+
+    position: relative;
+
+    width: min(90%,
+            420px);
+
+    padding: 30px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    text-align: center;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.25);
+
+    pointer-events: auto;
+
+}
+
+
+/* ======================================
+   Mensagem
+   ====================================== */
+
+.portal-notification-message {
+
+    margin-bottom: 25px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+}
+
+
+/* ======================================
+   Área dos botões
+   ====================================== */
+
+.portal-notification-actions {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 10px;
+
+}
+
+
+/* ======================================
+   Botões
+   ====================================== */
+
+.portal-notification-close,
+.portal-notification-cancel {
+
+    padding: 10px 22px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+}
+
+
+/* ======================================
+   Verde
+   Senha chamada
+   ====================================== */
+
+.portal-notification-modal.success .portal-notification-content {
+
+    border-top: 6px solid #28a745;
+
+}
+
+.portal-notification-modal.success .portal-notification-message {
+
+    color: #155724;
+
+}
+
+
+/* ======================================
+   Vermelho
+   Senha ausente
+   ====================================== */
+
+.portal-notification-modal.error .portal-notification-content {
+
+    border-top: 6px solid #dc3545;
+
+}
+
+.portal-notification-modal.error .portal-notification-message {
+
+    color: #721c24;
+
+}
+
+
+/* ======================================
+   Azul
+   Informação
+   ====================================== */
+
+.portal-notification-modal.info .portal-notification-content {
+
+    border-top: 6px solid #17a2b8;
+
+}
+
+.portal-notification-modal.info .portal-notification-message {
+
+    color: #0c5460;
+
+}
+
+
+/* ======================================
+   Amarelo
+   Confirmação / aviso
+   ====================================== */
+
+.portal-notification-modal.warning .portal-notification-content {
+
+    border-top: 6px solid #ffc107;
+
+}
+
+.portal-notification-modal.warning .portal-notification-message {
+
+    color: #856404;
+
+}
+
+
+/* ======================================
+   Cancelar
+   ====================================== */
+
+.portal-notification-cancel {
+
+    background: #e0e0e0;
+
+}
