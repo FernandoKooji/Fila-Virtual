@@ -1,6 +1,6 @@
 # Sistema de Fila Virtual
 
-Sistema de gerenciamento de atendimento com fila virtual, desenvolvido como projeto acadêmico e primeira versão funcional.
+Sistema de gerenciamento de atendimento com fila virtual, primeira versão funcional.
 
 O sistema permite que clientes entrem em uma fila de atendimento, acompanhem sua posição e recebam atualizações sobre o andamento do atendimento. O atendente possui um painel para gerenciar a fila, chamar senhas, finalizar atendimentos e marcar senhas como ausentes.
 
@@ -487,7 +487,7 @@ em_atendimento
 ```
 
 ---
-
+<!--
 ## Testes
 
 A API foi testada através do Swagger e do fluxo completo da aplicação.
@@ -581,7 +581,7 @@ A evolução planejada do projeto inclui:
 3. Relatórios e métricas.
 4. Comunicação em tempo real utilizando WebSocket.
 5. Melhorias de segurança e autenticação.
-6. Preparação para implantação em ambiente real.
+6. Acesso ao portal do cliente via QR Code
 
 ---
 <!--
@@ -601,5 +601,5 @@ A documentação complementar do desenvolvimento pode apresentar:
 
 <!-- INSERIR LINK AQUI: Relatório completo do projeto, caso seja publicado separadamente -->
 
-Projeto desenvolvido por Fernando Kooji Shimomura, para fins acadêmicos e de aprendizado, com foco em desenvolvimento de APIs, banco de dados, arquitetura de software e integração entre backend e frontend.
+Projeto desenvolvido por Fernando Kooji Shimomura, para fins de aprendizado, com foco em desenvolvimento de APIs, banco de dados, arquitetura de software e integração entre backend e frontend.
 
